@@ -5,7 +5,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_COMPILER_WORKS 1)
 
 project(
-    EDLIN
+    ED
     VERSION 0.1.0
     LANGUAGES C
 )
@@ -38,33 +38,25 @@ if(WATCOM)
     add_compile_definitions(
         __DOS__
         __8086__  # Explicit 8086 target
-        # custom tiny stdio policies here
-        TINY_POLICY_STDIO_PRINTF_CAN_FLOAT
-        TINY_POLICY_STDIO_PRINTF_CAN_SCIENTIFIC
+        # custom policies here
     )
 endif()
 
 # Add definitions
-add_compile_definitions(TINY_POLICY_STDIO_PRINTF_CAN_FLOAT)
-add_compile_definitions(TINY_POLICY_STDIO_PRINTF_CAN_SCIENTIFIC)
+#
 
 # WARNING: Using GLOB for convenience. If adding new files, rerun:
 #   ./cmk.sh
 file(GLOB SOURCES
     CONFIGURE_DEPENDS
     *.c
-    BIOS/*c
-    DOS/*.c
-    STD/*.c
-    #MEM/*.c
-    #STR/*.c
-    #EDLIN/*.c
+    ED/*c
 )
 
 # message(Source list="${SOURCES}")
 
-add_executable(EDLIN ${SOURCES})
+add_executable(ED ${SOURCES})
 
 # Optional: Install target
 # rename me...
-#install(TARGETS example DESTINATION bin)
+# install(TARGETS example DESTINATION bin)
