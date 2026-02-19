@@ -71,11 +71,9 @@ bool sno_notany(sno_view_t* subject, sno_view_t charset);
 // RETURNS: true if ≥1 char matched, false otherwise
 bool sno_span(sno_view_t* subject, sno_view_t charset);
 
-// Match 1+ consecutive characters NOT in charset (greedy)
-// SNOBOL: BREAK('...')
-// SUCCESS: cursor advanced past longest prefix of non-charset chars (≥1 matched)
-// FAILURE: cursor unchanged             (first char in charset or EOF)
-// RETURNS: true if ≥1 char matched, false otherwise
+// Skip 0+ characters NOT in charset (SNOBOL: BREAK('set'))
+// ALWAYS succeeds for valid inputs — stops BEFORE first char in charset (or at end)
+// RETURNS: true for all valid inputs, false ONLY for NULL arguments
 bool sno_break(sno_view_t* subject, sno_view_t charset);
 
 // Skip 0+ characters from charset (idempotent whitespace skipping)
