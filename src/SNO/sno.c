@@ -111,7 +111,9 @@ bool sno_var(sno_view_t* subject, char* buf, size_t buflen) {
 }
 
 bool sno_int(sno_view_t* subject, int* n) {
-    if (!subject || !subject->begin || !n) return false;
+    if (!subject || !subject->begin || !n 
+        || subject->begin == subject->end
+    ) return false;
     
     // first char must be valid number start
     if (!char_in_set(*subject->begin, sno_bind("+-0123456789"))) return false;
@@ -120,7 +122,7 @@ bool sno_int(sno_view_t* subject, int* n) {
 
     sno_any(&temp, sno_bind("+-"));    // optional sign
 
-    sno_cursor_t digits_start = temp.begin;    // copy start 
+    sno_cursor_t p = temp.begin;    // copy start 
     if (!sno_span(&temp, sno_bind("0123456789"))) return false;  // no digits after sign
     
     // parse digits
