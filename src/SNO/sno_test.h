@@ -504,106 +504,103 @@ void test_span(void) {
     assert(sub.begin == orig + 3);                       // Still consumes all 'A's (greedy)
 }
 
+// ----------------------------------------------------------------------------
+// TEST: sno_break — Skip 0+ chars NOT in set (SNOBOL: BREAK('set'))
+// SPEC: ALWAYS succeeds for valid inputs (0+ semantics)
+//       Stops BEFORE first char in charset (or at end)
+//       Returns false ONLY for NULL arguments
+// ----------------------------------------------------------------------------
 void test_break(void) {
     sno_view_t sub;
     sno_cursor_t orig;
-
-    // SUCCESS: Single char NOT in charset → advance by exactly 1
-    char buf1[] = "X123";
+    
+    // SUCCESS: Multiple non-charset chars → stop BEFORE first charset char
+    char buf1[] = "FIELD,REST";
     sub = sno_bind(buf1);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("0123456789")) == true);  // 'X' not forbidden
-    assert(sub.begin == orig + 1);
-    assert(*sub.begin == '1');
-
-    // SUCCESS: Multiple consecutive non-charset chars (greedy consumption)
-    char buf2[] = "ABC123";
+    assert(sno_break(&sub, sno_bind(",")) == true);  // BREAK until comma
+    assert(sub.begin == orig + 5);                    // Consumed "FIELD"
+    assert(*sub.begin == ',');                        // Stopped BEFORE ','
+    
+    // CRITICAL: First char IS in charset → consume 0 chars (still succeeds)
+    char buf2[] = ",REST";
     sub = sno_bind(buf2);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("0123456789")) == true);
-    assert(sub.begin == orig + 3);          // Consumed "ABC"
-    assert(*sub.begin == '1');
-
-    // SUCCESS: Entire subject consumed (all chars excluded from charset)
-    char buf3[] = "XYZ";
+    assert(sno_break(&sub, sno_bind(",")) == true);  // BREAK succeeds with 0 chars
+    assert(sub.begin == orig);                        // Cursor unchanged (0 consumed)
+    assert(*sub.begin == ',');                        // Still at delimiter
+    
+    // SUCCESS: No charset char in subject → consume entire string
+    char buf3[] = "FIELD";
     sub = sno_bind(buf3);
-    assert(sno_break(&sub, sno_bind("0123456789")) == true);
-    assert(sub.begin == sub.end);
-
-    // FAILURE: First char IN charset → atomic rollback (≥1 requirement)
-    char buf4[] = "1ABC";
+    assert(sno_break(&sub, sno_bind(",")) == true);
+    assert(sub.begin == sub.end);                     // Fully consumed
+    
+    // SUCCESS: Empty subject → true (0 chars consumed is valid)
+    char buf4[] = "";
     sub = sno_bind(buf4);
-    orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("0123456789")) == false);  // '1' IS forbidden
-    assert(sub.begin == orig);
-
-    // FAILURE: Empty subject → false (cannot match ≥1 char)
-    char buf5[] = "";
+    assert(sno_break(&sub, sno_bind(",")) == true);
+    assert(sub.begin == sub.end);
+    
+    // SPECIAL: Empty charset → consume entire subject (nothing forbidden)
+    char buf5[] = "TEST";
     sub = sno_bind(buf5);
-    orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("A")) == false);
-    assert(sub.begin == orig);
-
-    // SPECIAL: Empty charset → matches ANY char (nothing forbidden), consumes 1+ greedily
-    char buf6[] = "TEST";
+    assert(sno_break(&sub, sno_bind("")) == true);
+    assert(sub.begin == sub.end);
+    
+    // SEMANTICS: Greedy consumption (longest possible prefix)
+    char buf6[] = "aaaabbb";
     sub = sno_bind(buf6);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("")) == true);
-    assert(sub.begin == sub.end);           // Consumed entire string
-
-    // SEMANTICS: Greedy consumption stops BEFORE first forbidden char
-    char buf7[] = "aaaabbb";
+    assert(sno_break(&sub, sno_bind("b")) == true);  // BREAK until 'b'
+    assert(sub.begin == orig + 4);                    // Consumed "aaaa"
+    assert(*sub.begin == 'b');                        // Stopped BEFORE first 'b'
+    
+    // SEMANTICS: Case sensitivity preserved
+    char buf7[] = "aAaA";
     sub = sno_bind(buf7);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("b")) == true);  // Exclude 'b'
-    assert(sub.begin == orig + 4);          // Consumed "aaaa", stopped BEFORE 'b'
-    assert(*sub.begin == 'b');
-
-    // SEMANTICS: Case sensitivity preserved
-    char buf8[] = "aAaA";
-    sub = sno_bind(buf8);
-    orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("A")) == true);  // Exclude uppercase 'A' only
-    assert(sub.begin == orig + 1);          // Consumed 'a', stopped at 'A'
+    assert(sno_break(&sub, sno_bind("A")) == true);  // BREAK until uppercase 'A'
+    assert(sub.begin == orig + 1);                    // Consumed lowercase 'a'
     assert(*sub.begin == 'A');
-
-    // CHAINING: BREAK + SPAN composition (field parsing)
-    char buf9[] = "NAME123,REST";
-    sub = sno_bind(buf9);
-    assert(sno_break(&sub, sno_bind("0123456789,")) == true);  // BREAK non-digit/non-comma
-    assert(strncmp(buf9, "NAME", 4) == 0);                     // "NAME" consumed
-    assert(sno_span(&sub, sno_bind("0123456789")) == true);    // SPAN digits → "123"
-    assert(sno_lit(&sub, sno_bind(",")) == true);              // Match delimiter
-
-    // NULL SAFETY
-    assert(sno_break(NULL, sno_bind("A")) == false);
-
+    
+    // CHAINING: BREAK + ANY composition (SNOBOL field parsing)
+    char buf8[] = "123,456,789";
+    sub = sno_bind(buf8);
+    assert(sno_break(&sub, sno_bind(",")) == true);   // BREAK non-comma → "123"
+    assert(sno_any(&sub, sno_bind(",")) == true);     // Consume ','
+    assert(sno_break(&sub, sno_bind(",")) == true);   // BREAK non-comma → "456"
+    assert(sno_any(&sub, sno_bind(",")) == true);     // Consume ','
+    assert(sno_break(&sub, sno_bind(",")) == true);   // BREAK non-comma → "789"
+    assert(sub.begin == sub.end);                     // Fully consumed
+    
+    // CRITICAL: NULL subject pointer → false (ONLY true failure case)
+    assert(sno_break(NULL, sno_bind(",")) == false);
+    
+    // CRITICAL: Subject with NULL begin → false
     sub = sno_view(NULL, NULL);
-    assert(sno_break(&sub, sno_bind("A")) == false);
+    assert(sno_break(&sub, sno_bind(",")) == false);
     assert(sub.begin == NULL && sub.end == NULL);
-
-    char buf10[] = "SAFE";
-    sub = sno_bind(buf10);
-    orig = sub.begin;
+    
+    // CRITICAL: Charset with NULL begin → false
+    char buf9[] = "SAFE";
+    sub = sno_bind(buf9);
     assert(sno_break(&sub, sno_view(NULL, NULL)) == false);
-    assert(sub.begin == orig);
-
-    // BOUNDARY: Single non-forbidden char at end
-    char buf11[] = "Z";
+    
+    // BOUNDARY: Single non-charset char
+    char buf10[] = "Z";
+    sub = sno_bind(buf10);
+    assert(sno_break(&sub, sno_bind("A")) == true);
+    assert(sub.begin == sub.end);                     // Consumed 'Z'
+    
+    // EDGE: Stops BEFORE first charset char (even if later chars allowed)
+    char buf11[] = "ABcDE";
     sub = sno_bind(buf11);
-    assert(sno_break(&sub, sno_bind("ABC")) == true);
-    assert(sub.begin == sub.end);
-
-    // EDGE: Stops BEFORE first forbidden char (even if later chars allowed)
-    char buf12[] = "ABcDE";
-    sub = sno_bind(buf12);
     orig = sub.begin;
     assert(sno_break(&sub, sno_bind("c")) == true);   // Stop BEFORE 'c'
     assert(sub.begin == orig + 2);                    // Consumed "AB"
     assert(*sub.begin == 'c');
 }
-
-#include <assert.h>
 
 // ----------------------------------------------------------------------------
 // TEST: sno_skip — Idempotent 0+ character skipping (SNOBOL: (SPAN(x) | NULL))
