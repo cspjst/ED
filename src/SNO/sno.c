@@ -46,10 +46,9 @@ static bool char_in_set(char c, sno_view_t charset) {
 }
 
 bool sno_any(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin
-        || sno_size(charset) == 0    // empty set always fails
-        || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
+    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
+    if (charset.begin >= charset.end) return false;     // empty set always fails
 
     if (!char_in_set(*subject->begin, charset)) return false;
     subject->begin++;
@@ -57,13 +56,12 @@ bool sno_any(sno_view_t* subject, sno_view_t charset) {
 }
 
 bool sno_notany(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin
-        || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
+    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
 
-    if (sno_size(charset) == 0) {
+    if (charset.begin >= charset.end) {
         subject->begin++;
-        return true;    // empty charset matches any character (since nothing is forbidden)
+        return true;  // empty charset matches any char
     }
 
     if (char_in_set(*subject->begin, charset)) return false;
@@ -72,76 +70,63 @@ bool sno_notany(sno_view_t* subject, sno_view_t charset) {
 }
 
 bool sno_span(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin
-        || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
+    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
+    if (charset.begin >= charset.end) return false;     // empty set always fails
 
     sno_cursor_t start = subject->begin;
     while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
         subject->begin++;
-
     return subject->begin != start;
 }
 
 bool sno_break(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin
-        || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
-    
+    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+    // 0+ semantics: empty subject is VALID (skip 0 chars)
     while (subject->begin < subject->end && !char_in_set(*subject->begin, charset))
         subject->begin++;
-
-    return true;  // even if we skipped 0 chars, it's still valid
+    return true;  // always succeeds for valid inputs
 }
 
 bool sno_skip(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin
-        || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
-
-    while (subject->begin < subject->end && char_in_set(*subject->begin, charset)) {
+    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+    // 0+ semantics: empty subject is VALID (skip 0 chars)
+    while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
         subject->begin++;
-    }
-
-    return true;  // even if skipped 0 chars, it's still valid
+    return true;  // always succeeds for valid inputs
 }
 
 bool sno_var(sno_view_t* subject, char* buf, size_t buflen) {
-    if (!subject || !subject->begin || !buf || buflen == 0
-        || sno_size(pattern) == 0    // empty subject is a fail
-        || sno_size(*subject) >= buflen // need at least len + 1 bytes for null terminator
-    ) return false;
+    if (!subject || !subject->begin || !subject->end || !buf || buflen == 0) return false;
+    int len = sno_size(*subject);
+    if (len < 0 || (size_t)len >= buflen) return false;  // need space for null terminator
 
-    while (subject->begin < subject->end) *buf++ = *subject->begin++;   // copy string
-    *buf = '\0';  // null-terminate
-
+    sno_cursor_t p = subject->begin;
+    while (p < subject->end) *buf++ = *p++;
+    *buf = '\0';
+    subject->begin = subject->end;  // consume entire view
     return true;
 }
 
 bool sno_int(sno_view_t* subject, int* n) {
-    if (!subject || !subject->begin || !n 
-       || sno_size(pattern) == 0    // empty subject is a fail
-    ) return false;
-    
-    // first char must be valid number start
+    if (!subject || !subject->begin || !subject->end || !n) return false;
+    if (subject->begin >= subject->end) return false;  // reject empty subject
     if (!char_in_set(*subject->begin, sno_bind("+-0123456789"))) return false;
-    
-    sno_view_t temp = *subject;    // copy view
 
-    sno_any(&temp, sno_bind("+-"));    // optional sign
+    sno_view_t temp = *subject;
+    sno_any(&temp, sno_bind("+-"));  // optional sign (atomic)
 
-    sno_cursor_t p = temp.begin;    // copy start 
-    if (!sno_span(&temp, sno_bind("0123456789"))) return false;  // no digits after sign
-    
-    // parse digits
+    sno_cursor_t p = temp.begin;
+    if (!sno_span(&temp, sno_bind("0123456789"))) return false;  // require digits
+
     int num = 0;
     while (p < temp.begin) {
         num = num * 10 + (*p - '0');
         p++;
     }
-    if (*subject->begin == '-')  num = -num;    
-    
+    if (*subject->begin == '-') num = -num;
+
     *n = num;
-    *subject = temp;  // advance original cursor past the number
+    *subject = temp;
     return true;
 }
