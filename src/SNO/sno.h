@@ -71,6 +71,13 @@ bool sno_notany(sno_view_t* subject, sno_view_t charset);
 // RETURNS: true if ≥1 char matched, false otherwise
 bool sno_span(sno_view_t* subject, sno_view_t charset);
 
+// Match 1+ consecutive characters NOT in charset (greedy)
+// SNOBOL: BREAK('...')
+// SUCCESS: cursor advanced past longest prefix of non-charset chars (≥1 matched)
+// FAILURE: cursor unchanged             (first char in charset or EOF)
+// RETURNS: true if ≥1 char matched, false otherwise
+bool sno_break(sno_view_t* subject, sno_view_t charset);
+
 // Skip 0+ characters from charset (idempotent whitespace skipping)
 // SNOBOL: (SPAN('...') | NULL)
 // SUCCESS: cursor advanced past all consecutive charset chars (may be 0)
@@ -78,17 +85,17 @@ bool sno_span(sno_view_t* subject, sno_view_t charset);
 // RETURNS: true for all valid inputs, false ONLY for NULL arguments
 bool sno_skip(sno_view_t* subject, sno_view_t charset);
 
+// Copy current view contents to buffer (null-terminated)
+// SUCCESS: entire view consumed (cursor = subject->end), buf contains copy
+// FAILURE: cursor unchanged (buffer too small or NULL args)
+// RETURNS: true if copy succeeded (sno_size(view) < buflen), false otherwise
+bool sno_var(sno_view_t* subject, char* buf, size_t buflen);
+
 // Parse signed integer from current cursor position
 // Format: [sign] digits (sign optional, digits required)
 // SUCCESS: cursor advanced past entire integer, *out = parsed value
 // FAILURE: cursor unchanged (invalid format: sign without digits, non-digit)
 // RETURNS: true on valid integer, false on parse error or NULL args
 bool sno_int(sno_view_t* subject, int* n);
-
-// Copy current view contents to buffer (null-terminated)
-// SUCCESS: entire view consumed (cursor = subject->end), buf contains copy
-// FAILURE: cursor unchanged (buffer too small or NULL args)
-// RETURNS: true if copy succeeded (sno_size(view) < buflen), false otherwise
-bool sno_var(sno_view_t* subject, char* buf, size_t buflen);
 
 #endif

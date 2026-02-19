@@ -35,89 +35,101 @@ bool sno_lit(sno_view_t* subject, sno_view_t pattern) {
     return true;
 }
 
-bool sno_any(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin ||
-        sno_size(charset) == 0) {   // empty set always fails
-        return false;
-    }
-
-    sno_cursor_t s = subject->begin;
+// Internal helper function - check if a single character is in the given charset
+// SUCCESS: returns true (character found in charset)
+// FAILURE: returns false (character not in charset or empty set)
+// RETURNS: true if char in set, false otherwise
+static bool char_in_set(char c, sno_view_t charset) {
     sno_cursor_t p = charset.begin;
-    while(p < charset.end && *p != *s) p++; // scan the set
+    while (p < charset.end && *p != c) p++;
+    return p != charset.end;
+}
 
-    if(p == charset.end) return false;  // no match = failure
-    subject->begin = s + 1;             // advance cursor
+bool sno_any(sno_view_t* subject, sno_view_t charset) {
+    if (!subject || !subject->begin || !charset.begin
+        || sno_size(charset) == 0  // empty set always fails
+    ) return false;
+
+    if (!char_in_set(*subject->begin, charset)) return false;
+    subject->begin++;
     return true;
 }
 
 bool sno_notany(sno_view_t* subject, sno_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin) return false;
+    if (!subject || !subject->begin || !charset.begin
+        || subject->begin >= subject->end   // empty subject is a fail
+    ) return false;
 
-    // empty charset matches any character (since nothing is forbidden)
     if (sno_size(charset) == 0) {
-        subject->begin = subject->begin + 1;
-        return true;
+        subject->begin++;
+        return true;    // empty charset matches any character (since nothing is forbidden)
     }
 
-    sno_cursor_t s = subject->begin;
-    sno_cursor_t p = charset.begin;
-    while(p < charset.end && *p != *s) p++; // scan the set
-
-    if (p != charset.end) return false; // any match = failure
-    subject->begin = s + 1;
+    if (char_in_set(*subject->begin, charset)) return false;
+    subject->begin++;
     return true;
 }
 
-//bool sno_span(sno_view_t* subject, sno_view_t charset);
-
-//bool sno_skip(sno_view_t* subject, sno_view_t charset);
-
-//bool sno_var(sno_view_t* subject, char* buf, size_t buflen);
-
-//bool sno_int(sno_view_t* subject, int* out);
-
-
-/*
-bool str_span(str_view_t* subject, str_view_t charset) {
-    if (!subject || !subject->begin || !charset.begin) return false;
-    if (subject->begin >= subject->end) return false;
-
-    str_cursor_t s = subject->begin;
-    str_cursor_t next = str_first_char(s, charset);
-    if (next == s) return false;  // First char not in set → failure
-
-    s = next;
-    while (s < subject->end) {
-        next = str_first_char(s, charset);
-        if (next == s) break;
-        s = next;
-    }
-
-    subject->begin = s;
-    return true;
-}
-
-bool str_skip(str_view_t* subject, str_view_t charset) {
+bool sno_span(sno_view_t* subject, sno_view_t charset) {
     if (!subject || !subject->begin || !charset.begin) return false;
 
-    bool matched = false;
-    while (subject->begin < subject->end) {
-        str_cursor_t prev = subject->begin;
-        if (!str_any(subject, charset)) break;
-        matched = true;
-    }
-    return matched;  // Returns true if ANY chars were skipped
+    sno_cursor_t start = subject->begin;
+    while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
+        subject->begin++;
+
+    return subject->begin != start;
 }
 
-bool str_var(str_view_t* subject, char* buf, size_t buflen) {
-    if (!subject || !buf || buflen == 0) return false;
+bool sno_break(sno_view_t* subject, sno_view_t charset) {
+    if (!subject || !subject->begin || !charset.begin) return false;
 
-    int len = str_view_size(*subject);
-    if (len < 0 || (size_t)len >= buflen) return false;  // Need space for null terminator
+    sno_cursor_t start = subject->begin;
+    while (subject->begin < subject->end && !char_in_set(*subject->begin, charset))
+        subject->begin++;
 
-    memcpy(buf, subject->begin, (size_t)len);
-    buf[len] = '\0';
-    subject->begin = subject->end;  // Consume entire view
+    return subject->begin != start;
+}
+
+bool sno_skip(sno_view_t* subject, sno_view_t charset) {
+    if (!subject || !subject->begin || !charset.begin) return false;
+
+    while (subject->begin < subject->end && char_in_set(*subject->begin, charset)) {
+        subject->begin++;
+    }
+
+    return true;  // even if skipped 0 chars, it's still valid
+}
+
+bool sno_var(sno_view_t* subject, char* buf, size_t buflen) {
+    if (!subject || !subject->begin || !buf || buflen == 0
+        || sno_size(*subject) >= buflen // need at least len + 1 bytes for null terminator
+    ) return false;
+
+    while (subject->begin < subject->end) *buf++ = *subject->begin++;   // copy string
+    *buf = '\0';  // null-terminate
+
     return true;
 }
- */
+
+bool sno_int(sno_view_t* subject, int* n) {
+    if (!subject || !subject->begin || !n) return false;
+
+    sno_view_t temp = *subject;
+    if (!sno_any(&temp, sno_bind("+-0123456789"))) return false;
+    sno_any(&temp, sno_bind("+-"));
+
+    sno_cursor_t digits = temp.begin;
+    if (!sno_span(&temp, sno_bind("0123456789"))) return false;
+
+    // lightweight atoi
+    int num = 0;
+    sno_cursor_t p = digits;
+    while (p < temp.begin) {
+        num = num * 10 + (*p - '0');
+        p++;
+    }
+    if (*subject->begin == '-') num = -num; // negative?
+
+    *n = num;
+    return true;
+}
