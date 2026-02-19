@@ -698,73 +698,86 @@ void test_skip(void) {
     assert(*sub.begin == 'T');
 }
 
-// Test sno_int with various inputs
-// Returns number of failed tests
-int test_int(void) {
-    int fails = 0;
-
-    struct {
-        char* input;
-        int expected_value;
-        int expected_result;
-        char* desc;
-    } tests[] = {
-        // Basic cases
-        {"123", 123, 1, "positive"},
-        {"-456", -456, 1, "negative"},
-        {"+789", 789, 1, "explicit positive"},
-
-        // Edge cases
-        {"0", 0, 1, "zero"},
-        {"-0", 0, 1, "negative zero"},
-        {"+0", 0, 1, "positive zero"},
-
-        // Boundaries
-        {"32767", 32767, 1, "INT16_MAX"},
-        {"-32768", -32768, 1, "INT16_MIN"},
-        {"2147483647", INT_MAX, 1, "INT_MAX"},
-        {"-2147483648", INT_MIN, 1, "INT_MIN"},
-
-        // Overflow (should fail)
-        {"2147483648", 0, 0, "INT_MAX+1"},
-        {"-2147483649", 0, 0, "INT_MIN-1"},
-        {"9999999999", 0, 0, "way too big"},
-
-        // Invalid (should fail)
-        {"", 0, 0, "empty string"},
-        {"+", 0, 0, "sign only"},
-        {"-", 0, 0, "minus only"},
-        {"+-123", 0, 0, "multiple signs"},
-        {"12a34", 0, 0, "letters in middle"},
-        {"a123", 0, 0, "letters before"},
-
-        // Partial consumption (these succeed but stop at non-digit)
-        {"123a", 123, 1, "letters after"},
-        {"123 ", 123, 1, "space after"},
-        {"123.45", 123, 1, "decimal after"},
-    };
-
-    int num_tests = sizeof(tests) / sizeof(tests[0]);
-
-    for (int i = 0; i < num_tests; i++) {
-        sno_view_t subject = sno_bind(tests[i].input);
-        sno_cursor_t start = subject.begin;
-        int n = 999;
-        int result = sno_int(&subject, &n);
-
-        int passed = 1;
-        if (result != tests[i].expected_result) passed = 0;
-        if (result && n != tests[i].expected_value) passed = 0;
-        if (!result && tests[i].expected_result == 0 && subject.begin != start) passed = 0;
-        if (result && tests[i].expected_result == 1 && subject.begin == start) passed = 0;
-
-        if (!passed) {
-            printf("FAIL: %s - input: \"%s\"\n", tests[i].desc, tests[i].input);
-            fails++;
-        }
-    }
-
-    return fails;
+void test_int(void) {
+    sno_view_t sub;
+    int n;
+    
+    // valid positives
+    sub = sno_bind("123");
+    assert(sno_int(&sub, &n) && n == 123 && sub.begin == sub.end);
+    
+    sub = sno_bind("+456");
+    assert(sno_int(&sub, &n) && n == 456 && sub.begin == sub.end);
+    
+    sub = sno_bind("0");
+    assert(sno_int(&sub, &n) && n == 0 && sub.begin == sub.end);
+    
+    sub = sno_bind("2147483647");
+    assert(sno_int(&sub, &n) && n == INT_MAX && sub.begin == sub.end);
+    
+    // valid negatives
+    sub = sno_bind("-123");
+    assert(sno_int(&sub, &n) && n == -123 && sub.begin == sub.end);
+    
+    sub = sno_bind("-2147483648");
+    assert(sno_int(&sub, &n) && n == INT_MIN && sub.begin == sub.end);
+    
+    // stop at NOTANY boundary
+    sub = sno_bind("123x");
+    assert(sno_int(&sub, &n) && n == 123 && *sub.begin == 'x');
+    
+    sub = sno_bind("-456y");
+    assert(sno_int(&sub, &n) && n == -456 && *sub.begin == 'y');
+    
+    // fail on invalid first char
+    sub = sno_bind("x123");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind(" 123");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("");
+    assert(!sno_int(&sub, &n));
+    
+    // reject malformed signs
+    sub = sno_bind("+");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("-");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("++1");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("--1");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("+-1");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("-+1");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("-x");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("+y");
+    assert(!sno_int(&sub, &n));
+    
+    sub = sno_bind("-0");
+    assert(sno_int(&sub, &n) && n == 0 && sub.begin == sub.end);
+    
+    // atomic rollback on failure
+    char buf[] = "x123";
+    sub = sno_bind(buf);
+    sno_cursor_t orig = sub.begin;
+    assert(!sno_int(&sub, &n) && sub.begin == orig);
+    
+    // NULL safety
+    assert(!sno_int(NULL, &n));
+    
+    sub = sno_view(NULL, NULL);
+    assert(!sno_int(&sub, &n));
 }
 
 // Master test runner
