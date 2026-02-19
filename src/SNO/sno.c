@@ -82,12 +82,11 @@ bool sno_span(sno_view_t* subject, sno_view_t charset) {
 
 bool sno_break(sno_view_t* subject, sno_view_t charset) {
     if (!subject || !subject->begin || !charset.begin) return false;
-
-    sno_cursor_t start = subject->begin;
+    
     while (subject->begin < subject->end && !char_in_set(*subject->begin, charset))
         subject->begin++;
 
-    return subject->begin != start;
+    return true;  // even if we skipped 0 chars, it's still valid
 }
 
 bool sno_skip(sno_view_t* subject, sno_view_t charset) {
