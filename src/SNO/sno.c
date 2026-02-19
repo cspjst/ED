@@ -111,64 +111,27 @@ bool sno_var(sno_view_t* subject, char* buf, size_t buflen) {
 }
 
 bool sno_int(sno_view_t* subject, int* n) {
-    if (!subject || !subject->begin || !n
-        || !char_in_set(*subject->begin, sno_bind("+-0123456789")    // fail if NaN
-    ) return false;
+    if (!subject || !subject->begin || !n) return false;
     
-    sno_view_t temp = subject
-    
-    if(sno_any(&temp, sno_bind("+-")) 
-        && !char_in_set(*subject->begin, sno_bind("0123456789")
-    ) return false;     // fail if sign not followed by a number
-
-    sno_cursor_t p = temp.begin;    // cursor after sign
-    
-    if (!sno_span(&temp, sno_bind("0123456789"))) return false;     // fail if NaN
-
-    // lightweight atoi
-    int num = 0;
-    while (p < temp.begin) {
-        num = num * 10 + (*p - '0');
-        p++;
-    }
-    if (*subject->begin == '-') num = -num; // negative?
-    *n = num;
-    *subject = temp;
-    return true;
-}
-
- if (!subject || !subject->begin || !n) return false;
-    
-    // Validate first char without consuming
-    if (subject->begin >= subject->end) return false;
+    // first char must be valid number start
     if (!char_in_set(*subject->begin, sno_bind("+-0123456789"))) return false;
     
-    sno_view_t temp = *subject;
-    bool neg = false;
+    sno_view_t temp = *subject;    // copy view
+
+    sno_any(&temp, sno_bind("+-"));    // optional sign
+
+    sno_cursor_t digits_start = temp.begin;    // copy start 
+    if (!sno_span(&temp, sno_bind("0123456789"))) return false;  // no digits after sign
     
-    // Optional sign using sno_any
-    if (*temp.begin == '-') {
-        neg = true;
-        if (!sno_any(&temp, sno_bind("-"))) return false;
-    } else if (*temp.begin == '+') {
-        if (!sno_any(&temp, sno_bind("+"))) return false;
-    }
-    
-    // Require 1+ digits
-    sno_cursor_t digits_start = temp.begin;
-    if (!sno_span(&temp, sno_bind("0123456789"))) {
-        return false;
-    }
-    
-    // Manual conversion
+    // parse digits
     int num = 0;
-    sno_cursor_t p = digits_start;
     while (p < temp.begin) {
         num = num * 10 + (*p - '0');
         p++;
     }
-    if (neg) num = -num;
+    if (*subject->begin == '-')  num = -num;    
     
-    *subject = temp;
     *n = num;
+    *subject = temp;  // advance original cursor past the number
     return true;
+}
