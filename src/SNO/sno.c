@@ -111,24 +111,64 @@ bool sno_var(sno_view_t* subject, char* buf, size_t buflen) {
 }
 
 bool sno_int(sno_view_t* subject, int* n) {
-    if (!subject || !subject->begin || !n) return false;
+    if (!subject || !subject->begin || !n
+        || !char_in_set(*subject->begin, sno_bind("+-0123456789")    // fail if NaN
+    ) return false;
+    
+    sno_view_t temp = subject
+    
+    if(sno_any(&temp, sno_bind("+-")) 
+        && !char_in_set(*subject->begin, sno_bind("0123456789")
+    ) return false;     // fail if sign not followed by a number
 
-    sno_view_t temp = *subject;
-    if (!sno_any(&temp, sno_bind("+-0123456789"))) return false;
-    sno_any(&temp, sno_bind("+-"));
-
-    sno_cursor_t digits = temp.begin;
-    if (!sno_span(&temp, sno_bind("0123456789"))) return false;
+    sno_cursor_t p = temp.begin;    // cursor after sign
+    
+    if (!sno_span(&temp, sno_bind("0123456789"))) return false;     // fail if NaN
 
     // lightweight atoi
     int num = 0;
-    sno_cursor_t p = digits;
     while (p < temp.begin) {
         num = num * 10 + (*p - '0');
         p++;
     }
     if (*subject->begin == '-') num = -num; // negative?
-
     *n = num;
+    *subject = temp;
     return true;
 }
+
+ if (!subject || !subject->begin || !n) return false;
+    
+    // Validate first char without consuming
+    if (subject->begin >= subject->end) return false;
+    if (!char_in_set(*subject->begin, sno_bind("+-0123456789"))) return false;
+    
+    sno_view_t temp = *subject;
+    bool neg = false;
+    
+    // Optional sign using sno_any
+    if (*temp.begin == '-') {
+        neg = true;
+        if (!sno_any(&temp, sno_bind("-"))) return false;
+    } else if (*temp.begin == '+') {
+        if (!sno_any(&temp, sno_bind("+"))) return false;
+    }
+    
+    // Require 1+ digits
+    sno_cursor_t digits_start = temp.begin;
+    if (!sno_span(&temp, sno_bind("0123456789"))) {
+        return false;
+    }
+    
+    // Manual conversion
+    int num = 0;
+    sno_cursor_t p = digits_start;
+    while (p < temp.begin) {
+        num = num * 10 + (*p - '0');
+        p++;
+    }
+    if (neg) num = -num;
+    
+    *subject = temp;
+    *n = num;
+    return true;
