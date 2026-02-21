@@ -588,7 +588,7 @@ void sno_test(void) {
     test_skip();
     test_var();
     test_int();
-    printf("All string primitive tests passed\n");
+    printf("All SNOBOL-C primitive tests pass!\n");
 }
 
 #endif

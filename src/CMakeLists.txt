@@ -50,7 +50,10 @@ endif()
 file(GLOB SOURCES
     CONFIGURE_DEPENDS
     *.c
-    SNO/*c
+    SNO/*.c
+    DOS/*.c
+    BIOS/*.c
+    STD/*.c
 )
 
 # message(Source list="${SOURCES}")
