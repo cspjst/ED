@@ -2,12 +2,12 @@
 #define  DOS_FILE_SERVICES_H
 
 #ifndef __LARGE__
-    //#error "This module requires large memory model (ie far data pointers)"
+    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #include "dos_error_types.h"
 #include "dos_file_types.h"
-#include <stdint.h>
+#include "../STD/dos_stdint.h"
 
 // 36  Get disk free space
 dos_error_code_t dos_get_disk_free_space(uint8_t drive_number, dos_file_disk_space_info_t* info);

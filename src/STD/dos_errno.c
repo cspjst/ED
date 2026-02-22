@@ -1,7 +1,5 @@
 #include "dos_errno.h"
 #include "../DOS/dos_error_types.h"
-#include <stdint.h>
-
 
 int errno = 0;
 

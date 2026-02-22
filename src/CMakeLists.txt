@@ -29,12 +29,13 @@ if(WATCOM)
         -ml                 # memory model options - large model
         -bt=dos             # Target DOS
         -w1                 # Mild warnings (avoid /w3 due to 8086 quirks)
-        -zld                # Link only referenced functions
+        #-zld                # Link only referenced functions
         #-zu                 # Smart library elimination
         #-zs                 # Strip debug info from linked libraries
         -zq                 # Quiet mode (cleaner output)
         #-dNDEBUG
     )
+
     add_compile_definitions(
         __DOS__
         __8086__  # Explicit 8086 target

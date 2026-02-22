@@ -1,7 +1,7 @@
 #ifndef STRING_H
 #define STRING_H
 
-#include <stddef.h>
+#include "dos_stddef.h"
 
 // String manipulation
 // strcpy // copies one string to another

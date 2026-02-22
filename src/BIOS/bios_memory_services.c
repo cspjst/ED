@@ -1,5 +1,5 @@
 #include "bios_memory_services.h"
-#include <stdint.h>
+#include "../STD/dos_stdint.h"
 
 uint16_t bios_get_startup_memory_kb() {
     uint16_t mem_blocks;

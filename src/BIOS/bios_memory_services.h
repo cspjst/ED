@@ -1,7 +1,7 @@
 #ifndef BIOS_MEMORY_SERVICES_H
 #define BIOS_MEMORY_SERVICES_H
 
-#include <stdint.h>
+#include "../STD/dos_stdint.h"
 
 #define BIOS_MEMORY_SERVICES    12h
 

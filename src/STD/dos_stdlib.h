@@ -1,8 +1,8 @@
 #ifndef TINY_STDLIB_H
 #define TINY_STDLIB_H
 
+#include "dos_stddef.h"
 #include "../DOS/dos_services.h"
-#include <stddef.h>
 
 void* malloc(size_t size);
 

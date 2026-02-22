@@ -29,10 +29,10 @@
  */
 
 #include "../DOS/dos_file_services.h"
-#include <stddef.h>
+#include "dos_stddef.h"
 
 #ifndef __LARGE__
-    //#error "This module requires large memory model (ie far data pointers)"
+    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #define DOS_STDIO_PRINTF_FLOAT
@@ -50,9 +50,9 @@
 typedef dos_file_handle_t FILE;
 
 // C type punning
-#define stdin  ((FILE*)(unsigned int)0)
-#define stdout ((FILE*)(unsigned int)1)
-#define stderr ((FILE*)(unsigned int)2)
+#define stdin  ((FILE*)(uintptr_t)0)
+#define stdout ((FILE*)(uintptr_t)1)
+#define stderr ((FILE*)(uintptr_t)2)
 
 // character output
 int fputc(int c, FILE* stream);

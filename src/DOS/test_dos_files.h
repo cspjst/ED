@@ -5,10 +5,10 @@
 #include "dos_file_services.h"
 #include "dos_error_types.h"
 #include "dos_file_services.h"
-#include <stdint.h>
-#include <stdio.h>
-#include <string.h>
-#include <assert.h>
+#include "dos_stdint.h"
+#include "../STD/dos_stdio.h"
+#include "../STD/dos_string.h"
+#include "../STD/dos_assert.h"
 
 void test_dos_files() {
     printf("Testing DOS File Functions...\n");

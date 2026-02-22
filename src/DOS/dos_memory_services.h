@@ -1,8 +1,12 @@
 #ifndef DOS_MEMORY_SERVICES_H
 #define DOS_MEMORY_SERVICES_H
 
+#ifndef __LARGE__
+    #error "This module requires large memory model (ie far data pointers)"
+#endif
+
 #include "dos_error_types.h"
-#include <stdint.h>
+#include "../STD/dos_stdint.h"
 
 #define DOS_PARAGRAPH_SIZE  16UL
 

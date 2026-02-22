@@ -4,8 +4,7 @@
 #include "dos_stdlib.h"
 #include "dos_stdio.h"
 #include "dos_assert.h"
-
-#include <stdint.h> // For size_t
+#include "dos_stddef.h" // For size_t
 
 // Helper function to check if a block of memory is zeroed
 int is_zeroed(const void* ptr, size_t size) {

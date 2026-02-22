@@ -3,7 +3,7 @@
 #include "dos_string.h"
 #include "dos_bool.h"
 #include "dos_limits.h"
-#include "dos_arg.h"
+#include "dos_stdarg.h"
 #include "../DOS/dos_services_constants.h"
 #include "../DOS/dos_file_constants.h"
 
@@ -132,7 +132,7 @@ static int print_scientific(double val, bool uppercase, FILE* stream) {
 // Core I/O primitives
 
 int fputc(int c, FILE* stream) {
-    dos_file_handle_t handle = (dos_file_handle_t)(unsigned int)stream;
+    dos_file_handle_t handle = (dos_file_handle_t)(uintptr_t)stream;
     dos_error_code_t err = 0;
     char buffer[2];
     uint16_t nbytes = 1;
@@ -290,7 +290,7 @@ int fgetc(FILE* stream) {
     uint16_t bytes_read = 0;
     dos_error_code_t err;
 
-    err = dos_read_file((dos_file_handle_t)(unsigned int)stream, 1, &buffer, &bytes_read);
+    err = dos_read_file((dos_file_handle_t)(uintptr_t)stream, 1, &buffer, &bytes_read);
 
     if (err != DOS_SUCCESS || bytes_read == 0) return EOF;
     return (unsigned char)buffer;
@@ -397,7 +397,7 @@ FILE* fopen(const char* filename, const char* mode) {
     }
 
     errno = 0;
-    return (FILE*)(unsigned int)handle;
+    return (FILE*)(uintptr_t)handle;
 }
 
 int fclose(FILE* stream) {
@@ -406,7 +406,7 @@ int fclose(FILE* stream) {
         return EOF;
     }
     errno = 0;
-    dos_error_code_t err = dos_close_file((dos_file_handle_t)(unsigned int)stream);
+    dos_error_code_t err = dos_close_file((dos_file_handle_t)(uintptr_t)stream);
     if (err) {
         errno = dos_to_errno(err);
         return EOF;

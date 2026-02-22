@@ -1,7 +1,7 @@
 #ifndef BIOS_KEYBOARD_TYPES_H
 #define BIOS_KEYBOARD_TYPES_H
 
-#include <stdint.h>
+#include "../STD/dos_stdint.h"
 
 typedef uint8_t bios_keybd_info_t;
 
