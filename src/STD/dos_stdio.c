@@ -7,70 +7,130 @@
 #include "../DOS/dos_services_constants.h"
 #include "../DOS/dos_file_constants.h"
 
-static void print_hex(unsigned long val, bool uppercase) {
-    if (val > 15) print_hex(val >> 4, uppercase);
+// helper functions
+static int print_hex(unsigned long val, bool uppercase, FILE* stream) {
+    int count = 0;
+    if (val > 15) {
+        int n = print_hex(val >> 4, uppercase, stream);
+        if (n == EOF) return EOF;
+        count += n;
+    }
     int digit = val & 0xF;
-    putchar(digit < 10 ? '0' + digit : (uppercase ? 'A' : 'a') + digit - 10);
+    char c = digit < 10 ? '0' + digit : (uppercase ? 'A' : 'a') + digit - 10;
+    if (fputc(c, stream) == EOF) return EOF;
+    return count + 1;
 }
 
-static void print_uint(unsigned long val, int base) {
-    if (val >= base) print_uint(val / base, base);
+static int print_uint(unsigned long val, int base, FILE* stream) {
+    int count = 0;
+    if (val >= base) {
+        int n = print_uint(val / base, base, stream);
+        if (n == EOF) return EOF;
+        count += n;
+    }
     int digit = val % base;
-    putchar(digit < 10 ? '0' + digit : 'A' + digit - 10);
+    char c = digit < 10 ? '0' + digit : 'A' + digit - 10;
+    if (fputc(c, stream) == EOF) return EOF;
+    return count + 1;
 }
 
-static void print_int(long val, int base) {
+static int print_int(long val, int base, FILE* stream) {
+    int count = 0;
     if (val < 0) {
-        putchar('-');
-        if (val == LONG_MIN) { // avoid overflow
+        if (fputc('-', stream) == EOF) return EOF;
+        count++;
+        if (val == LONG_MIN) {
             if (base == 10) {
-                print_uint((unsigned long)(-(val + 1)) + 1, 10);
+                int n = print_uint((unsigned long)(-(val + 1)), 10, stream);
+                if (n == EOF) return EOF;
+                return count + n;
             }
-            return;
+            return count;
         }
         val = -val;
     }
-    print_uint(val, base);
+    int n = print_uint(val, base, stream);
+    if (n == EOF) return EOF;
+    return count + n;
 }
 
 #ifdef DOS_STDIO_PRINTF_FLOAT
-static void print_float(double val) {
+static int print_float(double val, FILE* stream) {
+    int count = 0;
+
     if (val < 0) {
-        putchar('-');
+        if (fputc('-', stream) == EOF) return EOF;
         val = -val;
+        count++;
     }
+
     long int_part = (long)val;
-    print_int(int_part, 10);
-    putchar('.');
+    int n = print_int(int_part, 10, stream);
+    if (n == EOF) return EOF;
+    count += n;
+
+    if (fputc('.', stream) == EOF) return EOF;
+    count++;
+
     double frac = val - int_part;
     if (frac < 0) frac = -frac;
     long frac_part = (long)(frac * 1000);
-    print_int(frac_part, 10);
+
+    if (frac_part == 0) {
+        if (fputs("000", stream) == EOF) return EOF;
+        count += 3;
+    } else {
+        char buf[4];
+        char *p = buf + 3;
+        *p = '\0';
+        while (frac_part > 0 && p > buf) {
+            *--p = '0' + (frac_part % 10);
+            frac_part /= 10;
+        }
+        while (p > buf) *--p = '0';
+        if (fputs(buf, stream) == EOF) return EOF;
+        count += 3;
+    }
+    return count;
 }
 #endif
 
 #ifdef DOS_STDIO_PRINTF_SCIENTIFIC
-static void print_scientific(double val, bool uppercase) {
+static int print_scientific(double val, bool uppercase, FILE* stream) {
+    int count = 0;
+
     if (val < 0) {
-        putchar('-');
+        if (fputc('-', stream) == EOF) return EOF;
         val = -val;
+        count++;
     }
+
+    if (val == 0.0) {
+        if (fputs("0.000e0", stream) == EOF) return EOF;
+        return 7;
+    }
+
     int exp = 0;
-    while (val >= 10.0) {
-        val /= 10.0;
-        exp++;
-    }
-    while (val < 1.0 && val != 0.0) {
-        val *= 10.0;
-        exp--;
-    }
-    print_float(val);
-    putchar(uppercase ? 'E' : 'e');
-    print_int(exp, 10);
+    while (val >= 10.0) { val /= 10.0; exp++; }
+    while (val < 1.0)   { val *= 10.0; exp--; }
+
+    int n = print_float(val, stream);
+    if (n == EOF) return EOF;
+    count += n;
+
+    if (fputc(uppercase ? 'E' : 'e', stream) == EOF) return EOF;
+    count++;
+
+    n = print_int(exp, 10, stream);
+    if (n == EOF) return EOF;
+    count += n;
+
+    return count;
 }
 #endif
 
-// character output
+// Core I/O primitives
+
 int fputc(int c, FILE* stream) {
     dos_file_handle_t handle = (dos_file_handle_t)(unsigned int)stream;
     dos_error_code_t err = 0;
@@ -112,7 +172,6 @@ END:    pop     si
     return (unsigned char)c;
 }
 
-// string output
 int fputs(const char* str, FILE* stream) {
     while (*str) {
         if (fputc(*str++, stream) == EOF) return EOF;
@@ -120,100 +179,112 @@ int fputs(const char* str, FILE* stream) {
     return 0;
 }
 
-// formatted output
-int printf(const char* format, ...) {
+// Core formatted output
+
+int fprintf(FILE* stream, const char* format, ...) {
     va_list args;
     va_start(args, format);
 
+    int count = 0;
     const char* p = format;
-    while (*p) {
-        if (*p == '%') {
-            p++;
 
-            bool is_long = false;
-            if (*p == 'l') {
-                is_long = true;
-                p++;
+    while (*p) {
+        if (*p != '%') {
+            if (fputc(*p, stream) == EOF) { va_end(args); return EOF; }
+            count++;
+            p++;
+            continue;
+        }
+
+        p++;  /* skip '%' */
+
+        bool is_long = false;
+        if (*p == 'l') {
+            is_long = true;
+            p++;
+        }
+
+        int n = 0;
+        switch (*p++) {
+            case 'c':
+                n = (fputc(va_arg(args, int), stream) == EOF) ? EOF : 1;
+                break;
+
+            case 's': {
+                char* str = va_arg(args, char*);
+                if (!str) str = "(null)";
+                while (*str) {
+                    if (fputc(*str++, stream) == EOF) { n = EOF; break; }
+                    count++;
+                }
+                if (n != EOF) n = 0;
+                break;
             }
 
-            switch (*p) {
-                case 'c': {
-                    int c = va_arg(args, int);
-                    putchar(c);
-                    break;
-                }
-                case 's': {
-                    char* str = va_arg(args, char*);
-                    if (!str) str = "(null)";
-                    while (*str) putchar(*str++);
-                    break;
-                }
-                case 'd':
-                case 'i':
-                    if (is_long)
-                        print_int(va_arg(args, long), 10);
-                    else
-                        print_int(va_arg(args, int), 10);
-                    break;
-                case 'u':
-                    if (is_long)
-                        print_uint(va_arg(args, unsigned long), 10);
-                    else
-                        print_uint(va_arg(args, unsigned int), 10);
-                    break;
-                case 'x':
-                    if (is_long)
-                        print_hex(va_arg(args, unsigned long), false);
-                    else
-                        print_hex(va_arg(args, unsigned int), false);
-                    break;
-                case 'p':
-                case 'X':
-                    if (is_long)
-                        print_hex(va_arg(args, unsigned long), true);
-                    else
-                        print_hex(va_arg(args, unsigned int), true);
-                    break;
-                case 'o':
-                    if (is_long)
-                        print_uint(va_arg(args, unsigned long), 8);
-                    else
-                        print_uint(va_arg(args, unsigned int), 8);
-                    break;
+            case 'd':
+            case 'i':
+                n = is_long ? print_int(va_arg(args, long), 10, stream)
+                            : print_int(va_arg(args, int), 10, stream);
+                break;
+
+            case 'u':
+                n = is_long ? print_uint(va_arg(args, unsigned long), 10, stream)
+                            : print_uint(va_arg(args, unsigned int), 10, stream);
+                break;
+
+            case 'x':
+                n = is_long ? print_hex(va_arg(args, unsigned long), false, stream)
+                            : print_hex(va_arg(args, unsigned int), false, stream);
+                break;
+
+            case 'p':
+            case 'X':
+                n = is_long ? print_hex(va_arg(args, unsigned long), true, stream)
+                            : print_hex(va_arg(args, unsigned int), true, stream);
+                break;
+
+            case 'o':
+                n = is_long ? print_uint(va_arg(args, unsigned long), 8, stream)
+                            : print_uint(va_arg(args, unsigned int), 8, stream);
+                break;
 
 #ifdef DOS_STDIO_PRINTF_FLOAT
-                case 'f':
-                    print_float(va_arg(args, double));
-                    break;
+            case 'f':
+                n = print_float(va_arg(args, double), stream);
+                break;
 #endif
 
 #ifdef DOS_STDIO_PRINTF_SCIENTIFIC
-                case 'e':
-                    print_scientific(va_arg(args, double), false);
-                    break;
-                case 'E':
-                    print_scientific(va_arg(args, double), true);
-                    break;
+            case 'e':
+                n = print_scientific(va_arg(args, double), false, stream);
+                break;
+            case 'E':
+                n = print_scientific(va_arg(args, double), true, stream);
+                break;
 #endif
-                case '%':
-                    putchar('%');
-                    break;
-                default:
-                    putchar('%');
-                    putchar(*p);
-                    break;
-            }
-        } else {
-            putchar(*p);
+
+            case '%':
+                n = (fputc('%', stream) == EOF) ? EOF : 1;
+                break;
+
+            default:
+                if (fputc('%', stream) == EOF || fputc(p[-1], stream) == EOF)
+                    n = EOF;
+                else
+                    n = 2;
+                break;
         }
-        p++;
+
+        if (n == EOF) { va_end(args); return EOF; }
+        count += n;
     }
 
     va_end(args);
-    return 0;
+    return count;
 }
 
-// character input
+// Input functions
+
 int fgetc(FILE* stream) {
     char buffer;
     uint16_t bytes_read = 0;
@@ -222,10 +293,9 @@ int fgetc(FILE* stream) {
     err = dos_read_file((dos_file_handle_t)(unsigned int)stream, 1, &buffer, &bytes_read);
 
     if (err != DOS_SUCCESS || bytes_read == 0) return EOF;
-    return (unsigned char)buffer;   // unsigned char cast to int (per C standard)
+    return (unsigned char)buffer;
 }
 
-// string input
 char* fgets(char* s, int size, FILE* stream) {
     if (!s || !stream || size <= 0) return NULL;
 
@@ -235,7 +305,7 @@ char* fgets(char* s, int size, FILE* stream) {
     dos_error_code_t err;
     size--;
 
-    if (handle == DOS_STDIN_HANDLE) { // character by character input
+    if (handle == DOS_STDIN_HANDLE) {
         char c;
         while (size) {
             err = dos_read_file(handle, 1, &c, &bytes_read);
@@ -248,7 +318,13 @@ char* fgets(char* s, int size, FILE* stream) {
     } else {
         dos_error_code_t err = dos_read_file(handle, size, s, &bytes_read);
         if (bytes_read == 0) return NULL;
-        while(*p++ != '\n' && p != s + bytes_read);
+        for (int i = 0; i < bytes_read; i++) {
+            if (s[i] == '\n') {
+                s[i+1] = '\0';
+                return s;
+            }
+        }
+        s[bytes_read] = '\0';
     }
     *p = '\0';
     return s;
@@ -262,6 +338,8 @@ void perror(const char *s) {
     fputs(strerror(errno), stderr);
     fputs("\r\n", stderr);
 }
+
+// File handling
 
 #ifdef DOS_STDIO_FILE_HANDLING
 
@@ -293,7 +371,6 @@ FILE* fopen(const char* filename, const char* mode) {
             return NULL;
     }
     if (err) {
-        //errno = dos_to_errno(err);
         return NULL;
     }
     return (FILE*)(unsigned int)handle;
