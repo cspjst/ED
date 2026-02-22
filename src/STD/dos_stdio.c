@@ -93,7 +93,7 @@ static int print_float(double val, FILE* stream) {
     }
     return count;
 }
-#endif
+#endif // DOS_STDIO_PRINTF_FLOAT
 
 #ifdef DOS_STDIO_PRINTF_SCIENTIFIC
 static int print_scientific(double val, bool uppercase, FILE* stream) {
@@ -127,7 +127,7 @@ static int print_scientific(double val, bool uppercase, FILE* stream) {
 
     return count;
 }
-#endif
+#endif // DOS_STDIO_PRINTF_SCIENTIFIC
 
 // Core I/O primitives
 
@@ -493,4 +493,4 @@ long ftell(FILE* stream) {
     return (long)pos;
 }
 
-#endif
+#endif // DOS_STDIO_FILE_HANDLING

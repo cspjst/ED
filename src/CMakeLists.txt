@@ -14,27 +14,30 @@ project(
 set(CMAKE_SYSTEM_NAME DOS)      # Target DOS
 set(CMAKE_C_COMPILER wcl)
 set(CMAKE_CXX_COMPILER wcl)
-set(CMAKE_LINKER wlink)         # Use Watcom's linker
+# set(CMAKE_LINKER wlink)        # wcl handles linking with -flag syntax
 set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 
 # watcom compiler options
 # https://users.pja.edu.pl/~jms/qnx/help/watcom/compiler-tools/cpopts.html
 if(WATCOM)
+    # === COMPILER-ONLY FLAGS (passed to wcl -c) ===
+    # These affect code generation, warnings, and compilation behavior
     add_compile_options(
         -0                  # Generate 8086/8088 instructions ONLY (no 286+)
-        -d0                 # no debug info
-        #-e0                 # no fp
-        #-os                 # optimize for space
+        -d0                 # no debug info in object files
+        #-e0                 # no fp emulation (uncomment to disable float support)
+        -os                 # optimize for space (critical for 64KB segments)
         -za99               # enable partial C99 compatibility
-        -ml                 # memory model options - large model
-        -bt=dos             # Target DOS
+        -ml                 # memory model: large (far data pointers) [must match link]
+        -bt=dos             # Target DOS runtime
         -w1                 # Mild warnings (avoid /w3 due to 8086 quirks)
-        #-zld                # Link only referenced functions
-        #-zu                 # Smart library elimination
-        #-zs                 # Strip debug info from linked libraries
-        -zq                 # Quiet mode (cleaner output)
-        #-dNDEBUG
+        -zq                 # Quiet mode (cleaner output) [also valid for linker]
     )
+
+    # === LINKER-ONLY FLAGS (passed to wcl during link step) ===
+    # CRITICAL: Single quoted string with SPACE separation
+    # wcl will translate these to wlink directives internally
+    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ml -bt=dos -zq -zld -zu -zs -fo=none")
 
     add_compile_definitions(
         __DOS__
@@ -60,6 +63,14 @@ file(GLOB SOURCES
 # message(Source list="${SOURCES}")
 
 add_executable(ED ${SOURCES})
+
+# === FREESTANDING BUILD: Exclude standard C runtime ===
+# For minimal libc: do not link clibl.lib, emu87.lib, etc.
+# The -fo=none flag above handles this; this property is redundant but explicit
+set_target_properties(ED PROPERTIES
+    LINK_SEARCH_START_STATIC ON
+    LINK_SEARCH_END_STATIC ON
+)
 
 # Optional: Install target
 # rename me...

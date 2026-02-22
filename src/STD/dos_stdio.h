@@ -1,6 +1,3 @@
-#ifndef DOS_STDIO_H
-#define DOS_STDIO_H
-
 /**
  * @file dos_stdio.h
  * @brief Minimal C99 stdio implementation for DOS environments
@@ -27,13 +24,15 @@
  * - Console-only \r\n conversion
  * - 16-bit file positions only
  */
-
-#include "../DOS/dos_file_services.h"
-#include "dos_stddef.h"
+#ifndef DOS_STDIO_H
+#define DOS_STDIO_H
 
 #ifndef __LARGE__
     #error "This module requires large memory model (ie far data pointers)"
 #endif
+
+#include "../DOS/dos_file_services.h"
+#include "dos_stddef.h"
 
 #define DOS_STDIO_PRINTF_FLOAT
 #define DOS_STDIO_PRINTF_SCIENTIFIC
@@ -93,6 +92,6 @@ int fseek(FILE* stream, long offset, int origin);
 long ftell(FILE* stream);
 int fclose(FILE* stream);
 
-#endif
+#endif // DOS_STDIO_FILE_HANDLING
 
-#endif
+#endif // DOS_STDIO_H

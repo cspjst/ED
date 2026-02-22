@@ -1,10 +1,16 @@
 #ifndef TEST_STDLIB_H
 #define TEST_STDLIB_H
 
+/*
 #include "dos_stdlib.h"
 #include "dos_stdio.h"
 #include "dos_assert.h"
 #include "dos_stddef.h" // For size_t
+*/
+#include <stdlib.h>
+#include <stdio.h>
+#include <assert.h>
+#include <stddef.h>
 
 // Helper function to check if a block of memory is zeroed
 int is_zeroed(const void* ptr, size_t size) {
