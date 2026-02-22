@@ -1,6 +1,7 @@
 cmake_minimum_required(VERSION 3.10)
 
-# Warning: This skips critical compiler checks. Only use this if Watcom fails CMake's detection
+# Warning: This skips critical compiler checks.
+# Only use this if Watcom fails CMake's detection
 # Necessary to suppress compiler checks for cross compilation using OW2 and C under ARM environments
 set(CMAKE_C_COMPILER_WORKS 1)
 
@@ -14,49 +15,63 @@ project(
 set(CMAKE_SYSTEM_NAME DOS)      # Target DOS
 set(CMAKE_C_COMPILER wcl)
 set(CMAKE_CXX_COMPILER wcl)
-# set(CMAKE_LINKER wlink)        # wcl handles linking with -flag syntax
+set(CMAKE_LINKER wlink)         # Use Watcom's linker
 set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 
 # watcom compiler options
 # https://users.pja.edu.pl/~jms/qnx/help/watcom/compiler-tools/cpopts.html
 if(WATCOM)
-    # === COMPILER-ONLY FLAGS (passed to wcl -c) ===
-    # These affect code generation, warnings, and compilation behavior
-    add_compile_options(
-        -0                  # Generate 8086/8088 instructions ONLY (no 286+)
-        -d0                 # no debug info in object files
-        #-e0                 # no fp emulation (uncomment to disable float support)
-        -os                 # optimize for space (critical for 64KB segments)
-        -za99               # enable partial C99 compatibility
-        -ml                 # memory model: large (far data pointers) [must match link]
-        -bt=dos             # Target DOS runtime
-        -w1                 # Mild warnings (avoid /w3 due to 8086 quirks)
-        -zq                 # Quiet mode (cleaner output) [also valid for linker]
-    )
+add_compile_options(
+# === REQUIRED (always on) ===
+        -0                  # 8086/8088 instructions ONLY
+        -bt=dos             # Target DOS
+        -l=dos              # Link DOS library
 
-    # === LINKER-ONLY FLAGS (passed to wcl during link step) ===
-    # CRITICAL: Single quoted string with SPACE separation
-    # wcl will translate these to wlink directives internally
-    set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -ml -bt=dos -zq -zld -zu -zs -fo=none")
+        # === MEMORY MODEL (pick ONE) ===
+        -ml                 # Large model: far data pointers (flexible)
+        # -zl               # Tiny model: .COM output, all segments unified (smallest)
 
-    add_compile_definitions(
-        __DOS__
-        __8086__  # Explicit 8086 target
-        # custom policies here
-    )
+        # === SIZE vs SPEED (pick ONE) ===
+        -os                 # Optimize for CODE SIZE
+        # -ot               # Optimize for SPEED
+        # -od               # Disable optimizations (debugging)
+
+        # === DEBUG/INFO ===
+        -d0                 # No debug info (smaller .obj + binary)
+        # -d1               # Line numbers only
+        # -d2               # Full debug symbols
+
+        # === STACK SAFETY ===
+        -e0                 # No stack checking (saves ~20 bytes)
+        # -e1               # Minimal stack overflow check
+
+        # === LANGUAGE COMPAT ===
+        -za99               # Partial C99 (va_arg, etc.)
+        # (omit for pure C89, slightly smaller)
+
+        # === WARNINGS ===
+        -w1                 # Mild warnings (avoids 8086 false positives)
+        # -w0               # No warnings
+        # -w2               # More warnings
+
+        # === BUILD OUTPUT ===
+        -zq                 # Quiet mode (cleaner output)
+        # (omit for verbose build log)
+)
+add_definitions(
+    -D__DOS__
+    -D__8086__  # Explicit 8086 target
+  )
 endif()
 
-# Add definitions
-#
-
-# WARNING: Using GLOB for convenience. If adding new files, rerun:
-#   ./cmk.sh
+# WARNING: Using GLOB for convenience. If adding new files, rerun: ./cmk.sh
 file(GLOB SOURCES
     CONFIGURE_DEPENDS
     *.c
-    SNO/*.c
-    DOS/*.c
     BIOS/*.c
+    DOS/*.c
+    ED/*.c
+    SNO/*.c
     STD/*.c
 )
 
@@ -64,14 +79,6 @@ file(GLOB SOURCES
 
 add_executable(ED ${SOURCES})
 
-# === FREESTANDING BUILD: Exclude standard C runtime ===
-# For minimal libc: do not link clibl.lib, emu87.lib, etc.
-# The -fo=none flag above handles this; this property is redundant but explicit
-set_target_properties(ED PROPERTIES
-    LINK_SEARCH_START_STATIC ON
-    LINK_SEARCH_END_STATIC ON
-)
-
 # Optional: Install target
 # rename me...
-# install(TARGETS example DESTINATION bin)
+#install(TARGETS snoc DESTINATION bin)

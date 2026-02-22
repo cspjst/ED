@@ -1,14 +1,14 @@
 #ifndef TEST_STDIO_H
 #define TEST_STDIO_H
 
-/*
+
 #include "dos_stdio.h"
 #include "dos_errno.h"
 #include "dos_stdlib.h"
 #include "dos_assert.h"
 #include "dos_string.h"
-*/
 
+/*
 #include <stdio.h>
 #include <errno.h>
 #include <stdlib.h>
@@ -16,6 +16,7 @@
 #include <string.h>
 #include <stddef.h>
 #include <stdint.h>
+*/
 
 #define TEST_BUF_SIZE 64
 

@@ -1,17 +1,18 @@
 #ifndef TEST_FILES_H
 #define TEST_FILES_H
 
-/*
 #include "dos_errno.h"
 #include "dos_assert.h"
 #include "dos_stdio.h"
 #include "dos_string.h"
 #include "../DOS/dos_file_services.h"
-*/
+
+/*
 #include <errno.h>
 #include <assert.h>
 #include <stdio.h>
 #include <string.h>
+*/
 
 #define TEST_BUF_SIZE 64
 

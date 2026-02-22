@@ -1,14 +1,15 @@
 #ifndef TEST_STRING_H
 #define TEST_STRING_H
 
-/*
+
 #include "dos_string.h"
 #include "dos_stdio.h"
 #include "dos_assert.h"
-*/
+/*
 #include <string.h>
 #include <stdio.h>
 #include <assert.h>
+*/
 
 void test_strlen() {
 
