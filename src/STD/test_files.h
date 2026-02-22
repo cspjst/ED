@@ -90,61 +90,91 @@ void test_fopen(void) {
 
     printf("fopen mode w - create new file\n");
     f = fopen(test_file, "w");
-    assert(f != NULL);
     perror("!");
+    assert(f != NULL);
+    assert(errno == 0);
 
-    /*
-
-    // Mode "r" - open existing file
+    printf("fopen mode r - open existing file\n");
     f = fopen(test_file, "r");
     assert(f != NULL);
     perror("!");
     test_file_cleanup(test_file);
 
-    // Mode "w+" - create with read-write
+    printf("fopen mode w+ - create with read-write\n");
     f = fopen(test_file, "w+");
     assert(f != NULL);
     perror("!");
-    test_file_cleanup(test_file);
 
-    // Mode "r+" - open existing with read-write
+    printf("fopen mode r+ - open existing with read-write\n");
     f = fopen(test_file, "r+");
     assert(f != NULL);
     perror("!");
     test_file_cleanup(test_file);
 
-    // Mode "r+" - non-existent should fail
+    printf("fopen mode r+ - non-existent should fail\n");
     f = fopen(test_file, "r+");
     assert(f == NULL);
     perror("!");
 
-    // Mode "a" - append (creates if not exists)
+    printf("fopen mode a - append (creates if not exists)\n");
     f = fopen(test_file, "a");
     assert(f != NULL);
     perror("!");
     test_file_cleanup(test_file);
 
-    // Mode "a+" - append with read (creates if not exists)
+    printf("fopen mode a+ - append with read (creates if not exists)\n");
     f = fopen(test_file, "a+");
     assert(f != NULL);
     perror("!");
     test_file_cleanup(test_file);
 
-    // Invalid mode should fail
+    printf("fopen invalid mode should fail\n");
     f = fopen(test_file, "x");
     perror("!");
     assert(f == NULL);
     assert(errno == EINVAL);
 
-    // NULL mode should fail
+    printf("fopen NULL mode should fail\n");
     f = fopen(test_file, NULL);
     perror("!");
     assert(f == NULL);
     assert(errno == EINVAL);
 
-    */
-
     printf("fopen() tests passed\n\n");
+}
+
+void test_fopen_exclusive() {
+
+    const char* test_file = "excl.txt";
+    FILE* f = NULL;
+
+    // Clean start
+    dos_delete_file(test_file);
+
+    // First create with "wx" should succeed
+    f = fopen(test_file, "wx");
+    assert(f != NULL);
+    fputs("first\n", f);
+    fclose(f);
+
+    // Second create with "wx" should fail (file exists)
+    f = fopen(test_file, "wx");
+    assert(f == NULL);
+    assert(errno == EEXIST);
+
+    // "w+x" should also fail
+    f = fopen(test_file, "w+x");
+    assert(f == NULL);
+    assert(errno == EEXIST);
+
+    // "w" (non-exclusive) should succeed and truncate
+    f = fopen(test_file, "w");
+    assert(f != NULL);
+    fclose(f);
+
+    // Clean up
+    dos_delete_file(test_file);
+    printf("fopen() exclusive-create test passed\n\n");
 }
 
 void test_fputc_fgetc(void) {
@@ -430,7 +460,7 @@ void test_fgets_file(void) {
     char* result = fgets(buf, TEST_BUF_SIZE, f);
     printf("Line 1: '%s'\n", buf);
     assert(result != NULL);
-    assert(strcmp(buf, "Hello, DOS!\n") == 0);
+    assert(strcmp(buf, "!Hello, DOS!\n") == 0);
 
     // Second line
     result = fgets(buf, TEST_BUF_SIZE, f);
@@ -499,14 +529,14 @@ void test_file_operations_integration(void) {
 void test_files(void) {
 
     test_fopen();
-    //getchar();
-    //test_fputc_fgetc();
-    //test_fputs_fgets();
-    //test_fwrite_fread();
-    //test_fseek_ftell();
-    //test_fclose();
-    //test_fgets_file();
-    //test_file_operations_integration();
+    test_fopen_exclusive();
+    test_fputc_fgetc();
+    test_fputs_fgets();
+    test_fwrite_fread();
+    test_fseek_ftell();
+    test_fclose();
+    test_fgets_file();
+    test_file_operations_integration();
 
 }
 

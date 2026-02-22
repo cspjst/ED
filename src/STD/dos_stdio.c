@@ -299,34 +299,25 @@ int fgetc(FILE* stream) {
 char* fgets(char* s, int size, FILE* stream) {
     if (!s || !stream || size <= 0) return NULL;
 
-    dos_file_handle_t handle = (dos_file_handle_t)(unsigned int)stream;
     char* p = s;
-    uint16_t bytes_read = 0;
-    dos_error_code_t err;
-    size--;
+    int remaining = size - 1;  // Reserve space for null terminator
 
-    if (handle == DOS_STDIN_HANDLE) {
-        char c;
-        while (size) {
-            err = dos_read_file(handle, 1, &c, &bytes_read);
-            if (err != DOS_SUCCESS && p == s) return NULL;
-            if (err != DOS_SUCCESS) break;
-            *p++ = c;
-            if (c == '\n') break;
-            size--;
+    while (remaining > 0) {
+        int c = fgetc(stream);  // Use core primitive; handles all streams
+
+        if (c == EOF) {
+            // EOF/error: return NULL if nothing read, else partial line
+            if (p == s) return NULL;
+            break;
         }
-    } else {
-        dos_error_code_t err = dos_read_file(handle, size, s, &bytes_read);
-        if (bytes_read == 0) return NULL;
-        for (int i = 0; i < bytes_read; i++) {
-            if (s[i] == '\n') {
-                s[i+1] = '\0';
-                return s;
-            }
-        }
-        s[bytes_read] = '\0';
+
+        *p++ = (char)c;
+        remaining--;
+
+        if (c == '\n') break;  // Line complete
     }
-    *p = '\0';
+
+    *p = '\0';  // Always null-terminate
     return s;
 }
 
@@ -343,36 +334,69 @@ void perror(const char *s) {
 
 #ifdef DOS_STDIO_FILE_HANDLING
 
+
 FILE* fopen(const char* filename, const char* mode) {
-    if (!mode || !mode[0]) {
+    if (!filename || !mode || !mode[0]) {
         errno = EINVAL;
         return NULL;
     }
-    errno = 0;
+
     dos_file_handle_t handle = 0;
-    dos_error_code_t err = 0;
-    dos_file_position_t p;
-    dos_file_access_attributes_t attr = (mode[1] == '+') ? ACCESS_READ_WRITE : ACCESS_READ_ONLY;
+    dos_error_code_t err = DOS_SUCCESS;
+    dos_file_position_t pos;
 
     switch (mode[0]) {
         case 'r':
-            err = dos_open_file(filename, attr, &handle);
+            // "r" / "r+" - must exist, fail if not found
+            err = dos_open_file(
+                filename,
+                (mode[1]=='+') ? ACCESS_READ_WRITE : ACCESS_READ_ONLY,
+                &handle
+            );
+            if (err) {
+                errno = dos_to_errno(err);
+                return NULL;
+            }
             break;
+
         case 'w':
-            err = dos_create_file(filename, CREATE_READ_WRITE, &handle);
+            // "w" / "w+" - truncate or create
+            // "wx" / "w+x" - exclusive create: fail if file exists
+            if (mode[1] == 'x' || mode[2] == 'x') {
+                // Exclusive create: try to open first; if succeeds, file exists → fail
+                err = dos_open_file(filename, ACCESS_READ_ONLY, &handle);
+                if (err == DOS_SUCCESS) {   // File exists → close probe handle and fail
+                    dos_close_file(handle);
+                    errno = EEXIST;
+                    return NULL;
+                }
+            } else {
+                dos_delete_file(filename);  // Non-exclusive: truncate by deleting first (ignore "not found")
+            }
+            err = dos_create_file(filename, CREATE_READ_WRITE, &handle); // DOS only able RW
+            if (err) {
+                errno = dos_to_errno(err);
+                return NULL;
+            }
             break;
+
         case 'a':
-            err = dos_open_file(filename, attr, &handle);
+            // Try open existing first
+            err = dos_open_file(filename, ACCESS_READ_WRITE, &handle);
             if (err) err = dos_create_file(filename, CREATE_READ_WRITE, &handle);
-            if (!err) dos_move_file_pointer(handle, 0, SEEK_END, &p);
+            if (err) {
+                errno = dos_to_errno(err);
+                return NULL;
+            }
+            dos_move_file_pointer(handle, 0, SEEK_END, &pos); // Append semantics: always seek to end
             break;
+
         default:
             errno = EINVAL;
             return NULL;
     }
-    if (err) {
-        return NULL;
-    }
+
+    errno = 0;
     return (FILE*)(unsigned int)handle;
 }
 
@@ -387,7 +411,86 @@ int fclose(FILE* stream) {
         errno = dos_to_errno(err);
         return EOF;
     }
+    errno = 0;
     return 0;
+}
+
+size_t fread(void* ptr, size_t size, size_t count, FILE* stream) {
+    if (!ptr || !stream || size == 0 || count == 0)
+        return 0;
+
+    uint16_t bytes = (uint16_t)(size * count);
+    uint16_t done = 0;
+    dos_error_code_t err = dos_read_file(
+        (dos_file_handle_t)(uintptr_t)stream,
+        bytes,
+        (char*)ptr,
+        &done
+    );
+
+    if (err != DOS_SUCCESS) {
+        errno = dos_to_errno(err);
+        return 0;
+    }
+    return done / size;
+}
+
+size_t fwrite(const void* ptr, size_t size, size_t count, FILE* stream) {
+    if (!ptr || !stream || size == 0 || count == 0)
+        return 0;
+
+    uint16_t bytes = (uint16_t)(size * count);
+    uint16_t done = 0;
+    dos_error_code_t err = dos_write_file(
+        (dos_file_handle_t)(uintptr_t)stream,
+        bytes,
+        (const char*)ptr,
+        &done
+    );
+
+    if (err != DOS_SUCCESS) {
+        errno = dos_to_errno(err);
+        return 0;
+    }
+    return done / size;
+}
+
+int fseek(FILE* stream, long offset, int origin) {
+    if (!stream) {
+        errno = EBADF;
+        return -1;
+    }
+    dos_file_position_t pos = 0;
+    dos_error_code_t err = dos_move_file_pointer(
+        (dos_file_handle_t)(uintptr_t)stream,
+        (dos_file_position_t)offset,
+        (uint8_t)origin,
+        &pos
+    );
+    if (err != DOS_SUCCESS) {
+        errno = dos_to_errno(err);
+        return -1;
+    }
+    return 0;
+}
+
+long ftell(FILE* stream) {
+    if (!stream) {
+        errno = EBADF;
+        return -1L;
+    }
+    dos_file_position_t pos = 0;
+    dos_error_code_t err = dos_move_file_pointer(
+        (dos_file_handle_t)(uintptr_t)stream,
+        0,
+        SEEK_CUR,
+        &pos
+    );
+    if (err != DOS_SUCCESS) {
+        errno = dos_to_errno(err);
+        return -1L;
+    }
+    return (long)pos;
 }
 
 #endif
