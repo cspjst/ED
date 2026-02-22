@@ -1,12 +1,11 @@
 #include "dos_stdio.h"
 #include "dos_errno.h"
 #include "dos_string.h"
+#include "dos_bool.h"
+#include "dos_limits.h"
+#include "dos_arg.h"
 #include "../DOS/dos_services_constants.h"
 #include "../DOS/dos_file_constants.h"
-#include "../DOS/dos_error_messages.h"
-#include <stdarg.h>
-#include <stdbool.h>
-#include <limits.h>
 
 static void print_hex(unsigned long val, bool uppercase) {
     if (val > 15) print_hex(val >> 4, uppercase);
@@ -73,7 +72,7 @@ static void print_scientific(double val, bool uppercase) {
 
 // character output
 int fputc(int c, FILE* stream) {
-    dos_file_handle_t handle = (dos_file_handle_t)(uintptr_t)stream;
+    dos_file_handle_t handle = (dos_file_handle_t)(unsigned int)stream;
     dos_error_code_t err = 0;
     char buffer[2];
     uint16_t nbytes = 1;
@@ -220,7 +219,7 @@ int fgetc(FILE* stream) {
     uint16_t bytes_read = 0;
     dos_error_code_t err;
 
-    err = dos_read_file((dos_file_handle_t)(uintptr_t)stream, 1, &buffer, &bytes_read);
+    err = dos_read_file((dos_file_handle_t)(unsigned int)stream, 1, &buffer, &bytes_read);
 
     if (err != DOS_SUCCESS || bytes_read == 0) return EOF;
     return (unsigned char)buffer;   // unsigned char cast to int (per C standard)
@@ -230,7 +229,7 @@ int fgetc(FILE* stream) {
 char* fgets(char* s, int size, FILE* stream) {
     if (!s || !stream || size <= 0) return NULL;
 
-    dos_file_handle_t handle = (dos_file_handle_t)(uintptr_t)stream;
+    dos_file_handle_t handle = (dos_file_handle_t)(unsigned int)stream;
     char* p = s;
     uint16_t bytes_read = 0;
     dos_error_code_t err;
@@ -297,7 +296,7 @@ FILE* fopen(const char* filename, const char* mode) {
         //errno = dos_to_errno(err);
         return NULL;
     }
-    return (FILE*)(uintptr_t)handle;
+    return (FILE*)(unsigned int)handle;
 }
 
 int fclose(FILE* stream) {
@@ -306,7 +305,7 @@ int fclose(FILE* stream) {
         return EOF;
     }
     errno = 0;
-    dos_error_code_t err = dos_close_file((dos_file_handle_t)(uintptr_t)stream);
+    dos_error_code_t err = dos_close_file((dos_file_handle_t)(unsigned int)stream);
     if (err) {
         errno = dos_to_errno(err);
         return EOF;
