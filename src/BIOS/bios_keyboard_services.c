@@ -12,7 +12,7 @@
 void bios_wait_for_keystroke_and_read(bios_key_t* key) {
     __asm {
 		.8086
-		pushf               ; not all BIOS functions are well nehaved
+		pushf               ; not all BIOS functions are well behaved
         push    ds
 
         les     di, key

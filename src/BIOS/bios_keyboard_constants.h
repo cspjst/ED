@@ -11,9 +11,11 @@
 #define BIOS_KEY_LEFT_SHIFT     2
 #define BIOS_KEY_CTRL           4
 #define BIOS_KEY_ALT            8
-#define BIOS_SCROLL_LOCK        16
-#define BIOS_NUM_LOCK           32
-#define BIOS_CAPS_LOCK          64
+#define BIOS_KEY_SCROLL_LOCK    16
+#define BIOS_KEY_NUM_LOCK       32
+#define BIOS_KEY_CAPS_LOCK      64
 #define BIOS_KEY_INSERT         128
+
+#define BIOS_ANY_SHIFT      (BIOS_RIGHT_SHIFT | BIOS_LEFT_SHIFT)  // Either Shift
 
 #endif

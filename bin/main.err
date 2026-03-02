@@ -1,2 +1,0 @@
-/Users/jeremythornton/dosbox/cspjst/ED/src/STD/test_files.h(45): Warning! W107: Missing return value for function 'test_file_setup'
-/Users/jeremythornton/dosbox/cspjst/ED/src/STD/test_files.h(66): Warning! W107: Missing return value for function 'test_file_readall'
