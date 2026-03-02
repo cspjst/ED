@@ -1,3 +1,6 @@
+/**
+ * @url https://www.stanislavs.org/helppc/
+ */
 #ifndef DOS_FILE_SERVICES_H
 #define  DOS_FILE_SERVICES_H
 

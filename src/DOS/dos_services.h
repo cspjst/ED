@@ -1,5 +1,6 @@
 /*
 * @url http://bitsavers.informatik.uni-stuttgart.de/pdf/borland/turbo_c/Turbo_C_Reference_Guide_1987.pdf
+* @url https://www.stanislavs.org/helppc/
 */
 #ifndef DOS_SERVICES_H
 #define DOS_SERVICES_H

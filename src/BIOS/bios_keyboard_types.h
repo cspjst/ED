@@ -2,7 +2,6 @@
 #define BIOS_KEYBOARD_TYPES_H
 
 
-
 typedef unsigned char bios_keybd_info_t;
 
 #pragma pack(1)

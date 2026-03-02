@@ -2,6 +2,8 @@
  * @file bios_memory_services.h
  * @brief BIOS memory detection functions for DOS systems
  *
+ * @url https://www.stanislavs.org/helppc/int_12.html
+ *
  * @details Provides interfaces to query system memory configuration using
  * various BIOS interrupts. Functions automatically adapt to the available
  * BIOS features on the target system.

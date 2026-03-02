@@ -1,3 +1,6 @@
+/**
+ * @url https://www.stanislavs.org/helppc/
+ */
 #ifndef DOS_MEMORY_SERVICES_H
 #define DOS_MEMORY_SERVICES_H
 
