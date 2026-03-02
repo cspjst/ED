@@ -1,6 +1,8 @@
 #ifndef TEST_BIOS_H
 #define TEST_BIOS_H
 
+#include "../BIOS/bios_memory_services.h"
+
 #include "../BIOS/bios_keyboard_services.h"
 #include "../BIOS/bios_keyboard_scan_codes.h"
 #include "../BIOS/bios_keyboard_constants.h"
@@ -9,7 +11,31 @@
 //#include "../STD/dos_string.h"
 #include "../STD/dos_assert.h"
 
-void test_bios() {
+void test_bios_memory(void) {
+    unsigned short base_memory;
+    unsigned long total_bytes;
+
+    // Get base memory size
+    base_memory = bios_get_startup_memory_kb();
+
+    // Display in various units
+    printf("Base memory (conventional):\n");
+    printf("  %u KB\n", base_memory);
+    printf("  %lu bytes\n", (unsigned long)base_memory * 1024L);
+    printf("  %u paragraphs\n", base_memory * 64);  // 64 paragraphs per KB
+
+    // Sanity checks
+    printf("\nSanity check: ");
+    if(base_memory > 0 && base_memory <= 640) {
+        printf("PASS (within 0-640K range)\n");
+    } else if(base_memory > 640 && base_memory < 1024) {
+        printf("WARNING: Unusual value (%u KB) - some systems report >640K\n", base_memory);
+    } else {
+        printf("FAIL: Impossible value (%u KB)\n", base_memory);
+    }
+}
+
+void test_bios_keys() {
     printf("Test BIOS...\n");
     assert(sizeof(unsigned char) == 1);
     assert(sizeof(unsigned short) == 2);

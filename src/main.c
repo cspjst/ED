@@ -6,7 +6,8 @@
 //#include "STD/dos_stdio.h"
 
 int main() {
-    test_bios();
+    test_bios_memory();
+    //test_bios_keys();
     //test_stdio();
     //test_string();
     //test_files();
