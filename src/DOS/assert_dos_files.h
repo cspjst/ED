@@ -1,5 +1,5 @@
-#ifndef DOS_FILE_TESTS_H
-#define DOS_FILE_TESTS_H
+#ifndef ASSERT_DOS_FILES_H
+#define ASSERT_DOS_FILES_H
 
 #include "../STD/dos_stdint.h"
 #include "dos_file_tools.h"
