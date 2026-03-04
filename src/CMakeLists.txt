@@ -22,41 +22,41 @@ set(CMAKE_EXECUTABLE_SUFFIX ".exe")
 # https://users.pja.edu.pl/~jms/qnx/help/watcom/compiler-tools/cpopts.html
 if(WATCOM)
 add_compile_options(
-# === REQUIRED (always on) ===
-        -0                  # 8086/8088 instructions ONLY
-        -bt=dos             # Target DOS
-        -l=dos              # Link DOS library
+    # === REQUIRED (always on) ===
+    -0                  # 8086/8088 instructions ONLY
+    -bt=dos             # Target DOS
+    -l=dos              # Link DOS library
 
-        # === MEMORY MODEL (pick ONE) ===
-        -ml                 # Large model: far data pointers (flexible)
-        # -zl               # Tiny model: .COM output, all segments unified (smallest)
+    # === MEMORY MODEL (pick ONE) ===
+    -ml                 # Large model: far data pointers (flexible)
+    # -zl               # Tiny model: .COM output, all segments unified (smallest)
 
-        # === SIZE vs SPEED (pick ONE) ===
-        -os                 # Optimize for CODE SIZE
-        # -ot               # Optimize for SPEED
-        # -od               # Disable optimizations (debugging)
+    # === SIZE vs SPEED (pick ONE) ===
+    -os                 # Optimize for CODE SIZE
+    # -ot               # Optimize for SPEED
+    # -od               # Disable optimizations (debugging)
 
-        # === DEBUG/INFO ===
-        -d0                 # No debug info (smaller .obj + binary)
-        # -d1               # Line numbers only
-        # -d2               # Full debug symbols
+    # === DEBUG/INFO ===
+    -d0                 # No debug info (smaller .obj + binary)
+    # -d1               # Line numbers only
+    # -d2               # Full debug symbols
 
-        # === STACK SAFETY ===
-        -e0                 # No stack checking (saves ~20 bytes)
-        # -e1               # Minimal stack overflow check
+    # === STACK SAFETY ===
+    -e0                 # No stack checking (saves ~20 bytes)
+    # -e1               # Minimal stack overflow check
 
-        # === LANGUAGE COMPAT ===
-        -za99               # Partial C99 (va_arg, etc.)
-        # (omit for pure C89, slightly smaller)
+    # === LANGUAGE COMPAT ===
+    -za99               # Partial C99 (va_arg, etc.)
+    # (omit for pure C89, slightly smaller)
 
-        # === WARNINGS ===
-        -w1                 # Mild warnings (avoids 8086 false positives)
-        # -w0               # No warnings
-        # -w2               # More warnings
+    # === WARNINGS ===
+    -w1                 # Mild warnings (avoids 8086 false positives)
+    # -w0               # No warnings
+    # -w2               # More warnings
 
-        # === BUILD OUTPUT ===
-        -zq                 # Quiet mode (cleaner output)
-        # (omit for verbose build log)
+    # === BUILD OUTPUT ===
+    -zq                 # Quiet mode (cleaner output)
+    # (omit for verbose build log)
 )
 add_definitions(
     -D__DOS__

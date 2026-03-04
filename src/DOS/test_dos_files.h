@@ -5,7 +5,7 @@
 #include "dos_file_services.h"
 #include "dos_error_types.h"
 #include "dos_file_services.h"
-#include "dos_stdint.h"
+#include "../STD/dos_stdint.h"
 #include "../STD/dos_stdio.h"
 #include "../STD/dos_string.h"
 #include "../STD/dos_assert.h"

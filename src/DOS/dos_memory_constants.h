@@ -1,0 +1,6 @@
+#ifndef DOS_MEMORY_CONSTANTS_H
+#define DOS_MEMORY_CONSTANTS_H
+
+#define DOS_PARAGRAPH_SIZE  16UL
+
+#endif

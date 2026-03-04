@@ -1,5 +1,5 @@
-#ifndef TINY_ASSERT_H
-#define TINY_ASSERT_H
+#ifndef DOS_ASSERT_H
+#define DOS_ASSERT_H
 
 #include "dos_stdlib.h"
 #include "dos_stdio.h"

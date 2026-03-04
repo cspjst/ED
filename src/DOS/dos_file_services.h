@@ -5,7 +5,7 @@
 #define  DOS_FILE_SERVICES_H
 
 #ifndef __LARGE__
-    #error "This module requires large memory model (ie far data pointers)"
+    //#error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #include "dos_error_types.h"

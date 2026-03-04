@@ -37,6 +37,8 @@
 * @return      the segment address of the reserved memory or 0 if request failed
 */
 dos_error_code_t dos_allocate_memory_blocks(uint16_t paragraphs, uint16_t* segment) {
+    if (!segment) return DOS_INVALID_DATA;
+
     dos_error_code_t err_code = 0;
     __asm {
         .8086
@@ -78,6 +80,8 @@ OK:     les     di, segment
 * @see  INT 21,4A
 */
 uint16_t dos_free_allocated_memory_blocks(uint16_t segment) {
+if (!segment) return DOS_INVALID_DATA;
+
     dos_error_code_t err_code = 0;
     __asm {
         .8086
@@ -105,6 +109,8 @@ uint16_t dos_free_allocated_memory_blocks(uint16_t segment) {
  * ignored, since DOS cannot allocate more than 640k of memory.)
  */
 dos_error_code_t dos_get_free_memory_paragraphs(uint16_t* free) {
+    if (!free) return DOS_INVALID_DATA;
+
     dos_error_code_t err_code;
     __asm {
         .8086
@@ -120,6 +126,10 @@ dos_error_code_t dos_get_free_memory_paragraphs(uint16_t* free) {
 
         pop     ds
         popf
+    }
+    // Treat "insufficient memory" as success for this query hack
+    if (err_code == DOS_INSUFFICIENT_MEMORY) {
+        return DOS_SUCCESS;
     }
     return err_code;
 }

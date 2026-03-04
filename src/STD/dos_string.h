@@ -11,7 +11,7 @@
 // String examination
 size_t strlen(const char* str);                 // returns the length of a given string
 int strcmp(const char* s1, const char* s2);     // compares two strings
-// strncmp // compares a certain amount of characters of two strings
+int strncmp( const char* lhs, const char* rhs, size_t count); // compares a certain amount of characters of two strings
 char* strchr(const char* str, int ch);          // finds the first occurrence of a character
 char* strrchr(const char* str, int ch);         // finds the last occurrence of a character
 // strspn // returns the length of the maximum initial segment that consists of only the characters found in another byte string
@@ -22,9 +22,9 @@ char* strrchr(const char* str, int ch);         // finds the last occurrence of 
 
 // Character array manipulation
 // memchr   // searches an array for the first occurrence of a character
-// memcmp   // compares two buffers
-// memset   // fills a buffer with a character
-// memcpy   // copies one buffer to another
+int memcmp(const void* lhs, const void* rhs, size_t count);   // compares two buffers
+void* memset(void* dest, int ch, size_t count);   // fills a buffer with a character
+void* memcpy(void* dest, const void* src, size_t count);   // copies one buffer to another
 // memmove  // moves one buffer to another
 // memccpy  // copies one buffer to another, stopping after the specified delimiter
 

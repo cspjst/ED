@@ -1,30 +1,14 @@
 #include "dos_string.h"
 #include "dos_errno.h"
 
-size_t strlen(const char *s) {
+// String examination
+
+size_t strlen(const char* str) {
+    if (!str) return 0;
+
     size_t len = 0;
-    __asm {
-        .8086
-        pushf
-        push    ds
+    while (*str++) len++;
 
-        les     di, s
-
-        xor     al, al          ; AL = 0: search for null terminator
-        mov     cx, 0FFFFh      ; CX = max scan count (64KB segment limit)
-        cld
-        repne   scasb           ; Scan ES:DI for AL
-
-        // On exit: DI points past null, CX = remaining count
-        // Length = (0xFFFF - CX) - 1 (exclude the null byte itself)
-        mov     ax, 0FFFFh
-        sub     ax, cx          ; AX = bytes scanned including null
-        dec     ax              ; Adjust: exclude null terminator
-        mov     len, ax
-
-        pop     ds
-        popf
-    }
     return len;
 }
 
@@ -36,9 +20,18 @@ int strcmp(const char* s1, const char* s2) {
     return (unsigned char)*s1 - (unsigned char)*s2;
 }
 
+int strncmp(const char* lhs, const char* rhs, size_t count) {
+    if (!lhs || !rhs) return (lhs > rhs) - (lhs < rhs);
+
+    for (; count && *lhs && (*lhs == *rhs); --count, ++lhs, ++rhs);
+
+    return count ? (unsigned char)*lhs - (unsigned char)*rhs : 0;
+}
+
 char* strchr(const char* str, int ch) {
     while (*str != '\0' && (unsigned char)*str != (unsigned char)ch)
         str++;
+
     return (unsigned char)*str == (unsigned char)ch ? (char*)str : NULL;
 }
 
@@ -50,6 +43,45 @@ char* strrchr(const char* str, int ch) {
     }
     if (ch == '\0') return (char*)str;
     return last;
+}
+
+// Character array manipulation
+
+int memcmp(const void* lhs, const void* rhs, size_t count) {
+    if (!lhs || !rhs) return (lhs > rhs) - (lhs < rhs);
+
+    const unsigned char* l = (const unsigned char*)lhs;
+    const unsigned char* r = (const unsigned char*)rhs;
+
+    while (count--) {
+        if (*l != *r) return *l - *r;
+        l++;
+        r++;
+    }
+
+    return 0;
+}
+
+void* memset(void* dest, int ch, size_t count) {
+    if (!dest) return NULL;
+
+    unsigned char* d = (unsigned char*)dest;
+    unsigned char c = (unsigned char)ch;
+
+    while (count--) *d++ = c;
+
+    return dest;
+}
+
+void* memcpy(void* dest, const void* src, size_t count) {
+    if (!dest || !src) return NULL;
+
+    unsigned char* d = (unsigned char*)dest;
+    const unsigned char* s = (const unsigned char*)src;
+
+    while (count--) *d++ = *s++;
+
+    return dest;
 }
 
 // POSIX.1-2008 compliant strerror()
