@@ -72,7 +72,7 @@ file(GLOB SOURCES
     DOS/*.c
     ED/*.c
     SNO/*.c
-    STD/*.c
+    # STD/*.c
 )
 
 # message(Source list="${SOURCES}")

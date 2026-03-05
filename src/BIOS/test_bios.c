@@ -5,8 +5,18 @@
 #include "../BIOS/bios_keyboard_scan_codes.h"
 #include "../BIOS/bios_keyboard_constants.h"
 
+#ifdef USE_STDDOS
+
 #include "../STD/dos_stdio.h"
 #include "../STD/dos_assert.h"
+
+#else
+
+#include <stdio.h>
+#include <assert.h>
+
+#endif
+
 
 void test_bios_memory(void) {
     unsigned short base_memory;
