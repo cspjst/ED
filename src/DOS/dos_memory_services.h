@@ -5,13 +5,18 @@
 #define DOS_MEMORY_SERVICES_H
 
 #ifndef __LARGE__
-    //#error "This module requires large memory model (ie far data pointers)"
+    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #include "dos_error_types.h"
 #include "dos_memory_constants.h"
 #include "dos_memory_types.h"
-#include "../STD/dos_stdint.h"
+
+#ifdef POLICY_USE_DOS_STDLIB
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
+#endif
 
 dos_error_code_t dos_allocate_memory_blocks(uint16_t paragraphs, uint16_t* segment);
 

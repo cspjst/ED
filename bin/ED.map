@@ -1,7 +1,7 @@
 Open Watcom Linker Version 2.0 beta Mar  1 2026 03:41:37 (64-bit)
 Copyright (c) 2002-2026 The Open Watcom Contributors. All Rights Reserved.
 Portions Copyright (c) 1985-2002 Sybase, Inc. All Rights Reserved.
-Created on:       26/03/05 16:34:45
+Created on:       26/03/05 21:06:13
 Executable Image: ED.exe
 creating a DOS executable
 
@@ -13,7 +13,7 @@ creating a DOS executable
 Group                           Address              Size
 =====                           =======              ====
 
-DGROUP                          03a9:0000            00000f60
+DGROUP                          05a6:0000            00002320
 
 
 
@@ -32,23 +32,23 @@ dos_file_tools_TEXT    CODE           AUTO           0000:0855       0000019b
 dos_memory_services_TEXT CODE         AUTO           0000:09f0       000000f7
 dos_services_TEXT      CODE           AUTO           0000:0ae7       000000a2
 sno_TEXT               CODE           AUTO           0000:0b89       000005f7
-main_TEXT              CODE           AUTO           0000:1180       0000001d
-_TEXT                  CODE           AUTO           0000:11a0       000028e6
-FAR_DATA               FAR_DATA       AUTO           03a8:0006       00000000
-_NULL                  BEGDATA        DGROUP         03a9:0000       00000020
-_AFTERNULL             BEGDATA        DGROUP         03ab:0000       00000002
-CONST                  DATA           DGROUP         03ab:0002       000003da
-CONST2                 DATA           DGROUP         03e8:000c       00000025
-_DATA                  DATA           DGROUP         03eb:0002       00000200
-XIB                    DATA           DGROUP         040b:0002       00000000
-XI                     DATA           DGROUP         040b:0002       00000018
-XIE                    DATA           DGROUP         040c:000a       00000000
-YIB                    DATA           DGROUP         040c:000a       00000000
-YI                     DATA           DGROUP         040c:000a       00000006
-YIE                    DATA           DGROUP         040d:0000       00000000
-DATA                   DATA           DGROUP         040d:0000       00000000
-_BSS                   BSS            DGROUP         040d:0000       00000118
-STACK                  STACK          DGROUP         041f:0000       00000800
+main_TEXT              CODE           AUTO           0000:1180       00001941
+_TEXT                  CODE           AUTO           0000:2ad0       00002f82
+FAR_DATA               FAR_DATA       AUTO           05a5:0002       00000000
+_NULL                  BEGDATA        DGROUP         05a6:0000       00000020
+_AFTERNULL             BEGDATA        DGROUP         05a8:0000       00000002
+CONST                  DATA           DGROUP         05a8:0002       0000171a
+CONST2                 DATA           DGROUP         0719:000c       00000025
+_DATA                  DATA           DGROUP         071c:0002       00000286
+XIB                    DATA           DGROUP         0744:0008       00000000
+XI                     DATA           DGROUP         0744:0008       00000018
+XIE                    DATA           DGROUP         0746:0000       00000000
+YIB                    DATA           DGROUP         0746:0000       00000000
+YI                     DATA           DGROUP         0746:0000       00000006
+YIE                    DATA           DGROUP         0746:0006       00000000
+DATA                   DATA           DGROUP         0746:0006       00000000
+_BSS                   BSS            DGROUP         0746:0006       00000118
+STACK                  STACK          DGROUP         0758:0000       00000800
 
 
                         +----------------+
@@ -68,33 +68,33 @@ Module: CMakeFiles/ED.dir/BIOS/bios_keyboard_services.c.obj(/home/jeremy/dosbox/
 Module: CMakeFiles/ED.dir/BIOS/bios_memory_services.c.obj(/home/jeremy/dosbox/cspjst/ED/src/BIOS/bios_memory_services.c)
 0000:008f      bios_get_startup_memory_kb_
 Module: CMakeFiles/ED.dir/BIOS/test_bios.c.obj(/home/jeremy/dosbox/cspjst/ED/src/BIOS/test_bios.c)
-0000:00b9      test_bios_memory_
+0000:00b9*     test_bios_memory_
 0000:01b2*     test_bios_keys_
 Module: CMakeFiles/ED.dir/DOS/dos_file_services.c.obj(/home/jeremy/dosbox/cspjst/ED/src/DOS/dos_file_services.c)
-0000:0520*     dos_get_disk_free_space_
-0000:0582*     dos_create_file_
-0000:05cf*     dos_open_file_
-0000:0615*     dos_close_file_
-0000:064f*     dos_read_file_
-0000:06a5*     dos_write_file_
-0000:06f0*     dos_delete_file_
+0000:0520      dos_get_disk_free_space_
+0000:0582      dos_create_file_
+0000:05cf      dos_open_file_
+0000:0615      dos_close_file_
+0000:064f      dos_read_file_
+0000:06a5      dos_write_file_
+0000:06f0      dos_delete_file_
 0000:072d      dos_move_file_pointer_
 0000:0785      dos_get_file_attributes_
 0000:07d0*     dos_set_file_attributes_
-0000:0816*     dos_rename_file_
+0000:0816      dos_rename_file_
 Module: CMakeFiles/ED.dir/DOS/dos_file_tools.c.obj(/home/jeremy/dosbox/cspjst/ED/src/DOS/dos_file_tools.c)
-0000:0855*     dos_file_exists_
-0000:087f*     dos_file_is_eof_
-0000:090e*     dos_file_size_
-0000:0983*     dos_file_ext_
+0000:0855      dos_file_exists_
+0000:087f      dos_file_is_eof_
+0000:090e      dos_file_size_
+0000:0983      dos_file_ext_
 Module: CMakeFiles/ED.dir/DOS/dos_memory_services.c.obj(/home/jeremy/dosbox/cspjst/ED/src/DOS/dos_memory_services.c)
-0000:09f0*     dos_allocate_memory_blocks_
-0000:0a48*     dos_free_allocated_memory_blocks_
-0000:0a8f*     dos_get_free_memory_paragraphs_
+0000:09f0      dos_allocate_memory_blocks_
+0000:0a48      dos_free_allocated_memory_blocks_
+0000:0a8f      dos_get_free_memory_paragraphs_
 Module: CMakeFiles/ED.dir/DOS/dos_services.c.obj(/home/jeremy/dosbox/cspjst/ED/src/DOS/dos_services.c)
-0000:0ae7*     dos_set_interrupt_vector_
-0000:0b1d*     dos_get_interrupt_vector_
-0000:0b62*     dos_terminate_process_with_return_code_
+0000:0ae7      dos_set_interrupt_vector_
+0000:0b1d      dos_get_interrupt_vector_
+0000:0b62      dos_terminate_process_with_return_code_
 Module: CMakeFiles/ED.dir/SNO/sno.c.obj(/home/jeremy/dosbox/cspjst/ED/src/SNO/sno.c)
 0000:0b89+     sno_bind_
 0000:0bd6*     sno_view_
@@ -108,212 +108,258 @@ Module: CMakeFiles/ED.dir/SNO/sno.c.obj(/home/jeremy/dosbox/cspjst/ED/src/SNO/sn
 0000:0fca*     sno_var_
 0000:1057*     sno_int_
 Module: CMakeFiles/ED.dir/main.c.obj(/home/jeremy/dosbox/cspjst/ED/src/main.c)
-0000:1180      main_
+0000:1180+     test_allocate_memory_
+0000:1322+     test_free_memory_
+0000:144f*     test_dos_memory_
+0000:146c*     test_get_free_memory_
+0000:15fd+     test_interrupt_vectors_
+0000:17c8*     test_dos_services_
+0000:17d4*     test_terminate_process_
+0000:1811+     test_dos_files_
+0000:2aa5      main_
 Module: /opt/watcom/lib286/dos/clibl.lib(stk)
-0000:11a5      __STK
-0000:11c5*     __STKOVERFLOW_
+0000:2ad5      __STK
+0000:2af5*     __STKOVERFLOW_
 Module: /opt/watcom/lib286/dos/clibl.lib(cmodel)
-0000:11e0      _big_code_
-0000:11e0*     CodeModelMismatch
+0000:2b10      _big_code_
+0000:2b10*     CodeModelMismatch
 Module: /opt/watcom/lib286/dos/clibl.lib(printf.c)
-0000:11e0      printf_
-Module: /opt/watcom/lib286/dos/clibl.lib(cstart)
-03a9:0000*     __nullarea
-03a9:0424*     __ovlflag
-03a9:0425*     __intno
-03a9:0426*     __ovlvec
-0000:1200      _cstart_
-0000:13ab      __exit_
-0000:13c8      __do_exit_with_msg_
-0000:14a5      __GETDS
-Module: /opt/watcom/lib286/dos/clibl.lib(xmsg.c)
-0000:14af*     __exit_with_msg_
-0000:14b2      __fatal_runtime_error_
-Module: /opt/watcom/lib286/dos/clibl.lib(crwdata)
-03a9:042a      __curbrk
-03a9:0432      __STACKLOW
-03a9:0434      __STACKTOP
-03a9:0436      __cbyte
-03a9:0438      __child
-03a9:043a      __no87
-03a9:0447      ___FPE_handler
-03a9:042c      __psp
-03a9:043b      __get_ovl_stack
-03a9:043f      __restore_ovl_stack
-03a9:0443      __close_ovl_file
-03a9:044b      __LpCmdLine
-03a9:044f      __LpPgmName
-03a9:042e      __osmajor
-03a9:042f      __osminor
-03a9:0430      __osmode
-03a9:0431      __HShift
+0000:2b10      printf_
+Module: /opt/watcom/lib286/dos/clibl.lib(assert99.c)
+0000:2b2f      _assert99_
+0000:2c7d*     __assert99_
 Module: /opt/watcom/lib286/dos/clibl.lib(iob.c)
-03a9:0454      ___iob
-03a9:0640      ___OpenStreams
-03a9:0644      ___ClosedStreams
-Module: /opt/watcom/lib286/dos/clibl.lib(fprtf.c)
-0000:14e8      __fprtf_
-Module: /opt/watcom/lib286/dos/clibl.lib(cmain086.c)
-0000:15ab      __CMain
-Module: /opt/watcom/lib286/dos/clibl.lib(initrtns.c)
-0000:15f9      __InitRtns
-0000:1650      __FiniRtns
-Module: /opt/watcom/lib286/dos/clibl.lib(uselfn.c)
-03a9:05bc      ___uselfn
-Module: /opt/watcom/lib286/dos/clibl.lib(dosseg)
-0000:16b0      __DOSseg__
-Module: /opt/watcom/lib286/dos/clibl.lib(enterdb.c)
-0000:16b1      __EnterWVIDEO_
-03a9:05be+     __WD_Present
-Module: /opt/watcom/lib286/dos/clibl.lib(initfile.c)
-0000:16d5      __InitFiles_
-Module: /opt/watcom/lib286/dos/clibl.lib(ioexit.c)
-0000:182c*     fcloseall_
-0000:1833      __full_io_exit_
-Module: /opt/watcom/lib286/dos/clibl.lib(fputc.c)
-0000:183b      fputc_
-Module: /opt/watcom/lib286/dos/clibl.lib(ioalloc.c)
-0000:1908      __ioalloc_
-Module: /opt/watcom/lib286/dos/clibl.lib(prtf.c)
-0000:24e1      __prtf_
-Module: /opt/watcom/lib286/dos/clibl.lib(flush.c)
-0000:2715      __flush_
-0000:2847*     __clib_flush_
-Module: /opt/watcom/lib286/dos/clibl.lib(___argc.c)
-03a9:0648      ____Argv
-03a9:064c      ____Argc
-Module: /opt/watcom/lib286/dos/clibl.lib(exit.c)
-0000:284b+     __null_int23_exit_
-0000:284c      exit_
-0000:2877*     _exit_
-03a9:05c0+     ___int23_exit
-03a9:05c2+     ___FPE_handler_exit
-Module: /opt/watcom/lib286/dos/clibl.lib(sgdef086)
-03a9:0622      __Start_XI
-03a9:063a      __End_XI
-03a9:063a      __Start_YI
-03a9:0640      __End_YI
-Module: /opt/watcom/lib286/dos/clibl.lib(nmalloc.c)
-0000:2890      _nmalloc_
-03a9:05c4      ___nheapbeg
-03a9:05c6      ___MiniHeapRover
-03a9:05c8      ___LargestSizeB4MiniHeapRover
-Module: /opt/watcom/lib286/dos/clibl.lib(fmalloc.c)
-0000:2967*     _fmalloc_
-0000:2967      malloc_
-03a9:05ca+     ___fheapbeg
-03a9:05cc      ___fheapRover
-03a9:05ce      ___LargestSizeB4Rover
-Module: /opt/watcom/lib286/dos/clibl.lib(fclose.c)
-0000:2a78+     __doclose_
-0000:2b36      __shutdown_stream_
-0000:2b4d*     fclose_
-03a9:064e+     ___RmTmpFileFn
-Module: /opt/watcom/lib286/dos/clibl.lib(freefp.c)
-0000:2b97      __freefp_
-0000:2c0c      __purgefp_
-Module: /opt/watcom/lib286/dos/clibl.lib(errno.c)
-0000:2c48*     __get_errno_ptr_
-03a9:0650      _errno
-Module: /opt/watcom/lib286/dos/clibl.lib(chktty.c)
-0000:2c4f      __chktty_
-Module: /opt/watcom/lib286/dos/clibl.lib(wctomb.c)
-0000:2c7a      wctomb_
-Module: /opt/watcom/lib286/dos/clibl.lib(itoa.c)
-0000:2ca3+     utoa_
-0000:2d00      itoa_
+05a6:17e6      ___iob
+05a6:1a06      ___OpenStreams
+05a6:1a0a      ___ClosedStreams
+Module: /opt/watcom/lib286/dos/clibl.lib(fgetc.c)
+0000:2cb2+     __fill_buffer_
+0000:2d9e      fgetc_
 Module: /opt/watcom/lib286/dos/clibl.lib(strlen.c)
-0000:2d24      strlen_
-Module: /opt/watcom/lib286/dos/clibl.lib(i4m)
-0000:2d3a*     __I4M
-0000:2d3a      __U4M
-Module: /opt/watcom/lib286/dos/clibl.lib(noefgfmt.c)
-03a9:05d0      ___EFG_printf
-03a9:05d4*     ___EFG_scanf
-Module: /opt/watcom/lib286/dos/clibl.lib(lltoa.c)
-0000:2d60      ulltoa_
-0000:2e44*     lltoa_
-Module: /opt/watcom/lib286/dos/clibl.lib(strupr.c)
-0000:2ea6      _strupr_
-Module: /opt/watcom/lib286/dos/clibl.lib(ltoa.c)
-0000:2ec8      ultoa_
-0000:2f37*     ltoa_
-Module: /opt/watcom/lib286/dos/clibl.lib(mbislead.c)
-0000:2f66      _ismbblead_
-03a9:0652      ___MBCSIsTable
-Module: /opt/watcom/lib286/dos/clibl.lib(__lseek.c)
-0000:2f83      __lseek_
-Module: /opt/watcom/lib286/dos/clibl.lib(qwrit.c)
-0000:2fc1      __qwrite_
-Module: /opt/watcom/lib286/dos/clibl.lib(fsync.c)
-0000:301d      fsync_
-Module: /opt/watcom/lib286/dos/clibl.lib(mem.c)
-0000:3030      __MemAllocator
-0000:30f6      __MemFree
-Module: /opt/watcom/lib286/dos/clibl.lib(nmemneed.c)
-0000:326d      __nmemneed_
-Module: /opt/watcom/lib286/dos/clibl.lib(grownear.c)
-0000:32ef      __LastFree_
-0000:3367      __ExpandDGROUP_
-Module: /opt/watcom/lib286/dos/clibl.lib(growseg.c)
-0000:346c      __GrowSeg_
-Module: /opt/watcom/lib286/dos/clibl.lib(allocseg.c)
-0000:353b      __AllocSeg_
-Module: /opt/watcom/lib286/dos/clibl.lib(fmemneed.c)
-0000:35da      __fmemneed_
-Module: /opt/watcom/lib286/dos/clibl.lib(heapgrow.c)
-0000:35dd*     _heapgrow_
-0000:35dd*     _fheapgrow_
-0000:35de      _nheapgrow_
-Module: /opt/watcom/lib286/dos/clibl.lib(_clse.c)
-0000:3655      __close_
-Module: /opt/watcom/lib286/dos/clibl.lib(ffree.c)
-0000:367e*     _ffree_
-0000:367e      free_
-Module: /opt/watcom/lib286/dos/clibl.lib(isatt.c)
-0000:36c6      isatty_
-Module: /opt/watcom/lib286/dos/clibl.lib(alphabet.c)
-03a9:03fc      ___Alphabet
-Module: /opt/watcom/lib286/dos/clibl.lib(mbinit.c)
-0000:3754      __mbinit_
-03a9:05d8+     ___MBCodePage
+0000:2e43      strlen_
+Module: /opt/watcom/lib286/dos/clibl.lib(strncmp.c)
+0000:2e58      strncmp_
+Module: /opt/watcom/lib286/dos/clibl.lib(strcmp.c)
+0000:2e95      strcmp_
+Module: /opt/watcom/lib286/dos/clibl.lib(cstart)
+05a6:0000*     __nullarea
+05a6:194e*     __ovlflag
+05a6:194f*     __intno
+05a6:1950*     __ovlvec
+0000:2ebe      _cstart_
+0000:3069      __exit_
+0000:3086      __do_exit_with_msg_
+0000:3163      __GETDS
+Module: /opt/watcom/lib286/dos/clibl.lib(xmsg.c)
+0000:316d*     __exit_with_msg_
+0000:3170      __fatal_runtime_error_
+Module: /opt/watcom/lib286/dos/clibl.lib(crwdata)
+05a6:1954      __curbrk
+05a6:195c      __STACKLOW
+05a6:195e      __STACKTOP
+05a6:1960      __cbyte
+05a6:1962      __child
+05a6:1964      __no87
+05a6:1971      ___FPE_handler
+05a6:1956      __psp
+05a6:1965      __get_ovl_stack
+05a6:1969      __restore_ovl_stack
+05a6:196d      __close_ovl_file
+05a6:1975      __LpCmdLine
+05a6:1979      __LpPgmName
+05a6:1958      __osmajor
+05a6:1959      __osminor
+05a6:195a      __osmode
+05a6:195b      __HShift
+Module: /opt/watcom/lib286/dos/clibl.lib(fprtf.c)
+0000:31a6      __fprtf_
+Module: /opt/watcom/lib286/dos/clibl.lib(_snprint.c)
+0000:329b+     _vsnprintf_
+0000:32fb      _snprintf_
+Module: /opt/watcom/lib286/dos/clibl.lib(enterdb.c)
+0000:331c      __EnterWVIDEO_
+05a6:197e      __WD_Present
+Module: /opt/watcom/lib286/dos/clibl.lib(stack086.c)
+0000:3340      stackavail_
+Module: /opt/watcom/lib286/dos/clibl.lib(strcpy.c)
+0000:3354      strcpy_
+Module: /opt/watcom/lib286/dos/clibl.lib(strcat.c)
+0000:339c      strcat_
+Module: /opt/watcom/lib286/dos/clibl.lib(sprintf.c)
+0000:33c7      sprintf_
+Module: /opt/watcom/lib286/dos/clibl.lib(rterrmsg.c)
+0000:33e8      __rterr_msg_
+Module: /opt/watcom/lib286/dos/clibl.lib(abort.c)
+0000:341b      abort_
+0000:3433*     __terminate_
+05a6:1980+     ___abort
+Module: /opt/watcom/lib286/dos/clibl.lib(initfile.c)
+0000:343f      __InitFiles_
+Module: /opt/watcom/lib286/dos/clibl.lib(ioexit.c)
+0000:3596*     fcloseall_
+0000:359d      __full_io_exit_
+Module: /opt/watcom/lib286/dos/clibl.lib(flushall.c)
+0000:35a5      __flushall_
+0000:3600*     flushall_
+Module: /opt/watcom/lib286/dos/clibl.lib(gtche.c)
+0000:3607      getche_
+Module: /opt/watcom/lib286/dos/clibl.lib(ioalloc.c)
+0000:3621      __ioalloc_
+Module: /opt/watcom/lib286/dos/clibl.lib(qread.c)
+0000:36b9      __qread_
+Module: /opt/watcom/lib286/dos/clibl.lib(errno.c)
+0000:36d7*     __get_errno_ptr_
+05a6:1a0e      _errno
+Module: /opt/watcom/lib286/dos/clibl.lib(cmain086.c)
+0000:36de      __CMain
+Module: /opt/watcom/lib286/dos/clibl.lib(initrtns.c)
+0000:372c      __InitRtns
+0000:3783      __FiniRtns
+Module: /opt/watcom/lib286/dos/clibl.lib(uselfn.c)
+05a6:1984      ___uselfn
+Module: /opt/watcom/lib286/dos/clibl.lib(dosseg)
+0000:37e4      __DOSseg__
+Module: /opt/watcom/lib286/dos/clibl.lib(fputc.c)
+0000:37e5      fputc_
+Module: /opt/watcom/lib286/dos/clibl.lib(prtf.c)
+0000:43f3      __prtf_
+Module: /opt/watcom/lib286/dos/clibl.lib(flush.c)
+0000:4627      __flush_
+0000:4759*     __clib_flush_
+Module: /opt/watcom/lib286/dos/clibl.lib(vsprintf.c)
+0000:4776      vsprintf_
+Module: /opt/watcom/lib286/dos/clibl.lib(fputs.c)
+0000:479d      fputs_
+Module: /opt/watcom/lib286/dos/clibl.lib(nmalloc.c)
+0000:4839      _nmalloc_
+05a6:1986      ___nheapbeg
+05a6:1988      ___MiniHeapRover
+05a6:198a      ___LargestSizeB4MiniHeapRover
+Module: /opt/watcom/lib286/dos/clibl.lib(fmalloc.c)
+0000:4910*     _fmalloc_
+0000:4910      malloc_
+05a6:198c+     ___fheapbeg
+05a6:198e      ___fheapRover
+05a6:1990      ___LargestSizeB4Rover
+Module: /opt/watcom/lib286/dos/clibl.lib(fclose.c)
+0000:4a21+     __doclose_
+0000:4adf      __shutdown_stream_
+0000:4af6*     fclose_
+05a6:1a10+     ___RmTmpFileFn
+Module: /opt/watcom/lib286/dos/clibl.lib(freefp.c)
+0000:4b40      __freefp_
+0000:4bb5      __purgefp_
+Module: /opt/watcom/lib286/dos/clibl.lib(chktty.c)
+0000:4bf1      __chktty_
 Module: /opt/watcom/lib286/dos/clibl.lib(dosret.c)
-0000:37d1      __set_errno_dos_
-0000:382b*     __set_errno_dos_reterr_
-Module: /opt/watcom/lib286/dos/clibl.lib(iomode.c)
-0000:3835      __GetIOMode_
-0000:385a      __SetIOMode_
-03a9:05ee+     ___NFiles
-03a9:05f0+     ___init_mode
-03a9:0618+     ___io_mode
-Module: /opt/watcom/lib286/dos/clibl.lib(filedos.c)
-0000:387d*     _dos_close_
-0000:3889      _dos_commit_
-Module: /opt/watcom/lib286/dos/clibl.lib(amblksiz.c)
-03a9:061c      __amblksiz
-Module: /opt/watcom/lib286/dos/clibl.lib(heapen.c)
-0000:3896*     _heapenable_
-03a9:061e      ___heap_enabled
-Module: /opt/watcom/lib286/dos/clibl.lib(sbrk.c)
-0000:38a7      __brk_
-0000:390c*     sbrk_
-Module: /opt/watcom/lib286/dos/clibl.lib(nfree.c)
-0000:391c      _nfree_
-03a9:0754+     ___MiniHeapFreeRover
-Module: /opt/watcom/lib286/dos/clibl.lib(mbisdbcs.c)
-03a9:0620      ___IsDBCS
-Module: /opt/watcom/lib286/dos/clibl.lib(memset.c)
-0000:3a19      memset_
-Module: /opt/watcom/lib286/dos/clibl.lib(getltdos.c)
-0000:3a30      dos_get_dbcs_lead_table_
-Module: /opt/watcom/lib286/dos/clibl.lib(getcpdos.c)
-0000:3a59      dos_get_code_page_
+0000:4c1c      __set_errno_dos_
+0000:4c76*     __set_errno_dos_reterr_
+Module: /opt/watcom/lib286/dos/clibl.lib(___argc.c)
+05a6:1a12      ____Argv
+05a6:1a16      ____Argc
+Module: /opt/watcom/lib286/dos/clibl.lib(exit.c)
+0000:4c80+     __null_int23_exit_
+0000:4c81      exit_
+0000:4cac*     _exit_
+05a6:19a6+     ___int23_exit
+05a6:19a8+     ___FPE_handler_exit
+Module: /opt/watcom/lib286/dos/clibl.lib(sgdef086)
+05a6:19e8      __Start_XI
+05a6:1a00      __End_XI
+05a6:1a00      __Start_YI
+05a6:1a06      __End_YI
+Module: /opt/watcom/lib286/dos/clibl.lib(wctomb.c)
+0000:4cc6      wctomb_
+Module: /opt/watcom/lib286/dos/clibl.lib(itoa.c)
+0000:4cef+     utoa_
+0000:4d4c      itoa_
+Module: /opt/watcom/lib286/dos/clibl.lib(i4m)
+0000:4d70*     __I4M
+0000:4d70      __U4M
+Module: /opt/watcom/lib286/dos/clibl.lib(noefgfmt.c)
+05a6:19aa      ___EFG_printf
+05a6:19ae*     ___EFG_scanf
+Module: /opt/watcom/lib286/dos/clibl.lib(lltoa.c)
+0000:4d96      ulltoa_
+0000:4e7a*     lltoa_
+Module: /opt/watcom/lib286/dos/clibl.lib(strupr.c)
+0000:4edc      _strupr_
+Module: /opt/watcom/lib286/dos/clibl.lib(ltoa.c)
+0000:4efe      ultoa_
+0000:4f6d*     ltoa_
+Module: /opt/watcom/lib286/dos/clibl.lib(mbislead.c)
+0000:4f9c      _ismbblead_
+05a6:1a18      ___MBCSIsTable
+Module: /opt/watcom/lib286/dos/clibl.lib(__lseek.c)
+0000:4fb9      __lseek_
+Module: /opt/watcom/lib286/dos/clibl.lib(qwrit.c)
+0000:4ff7      __qwrite_
+Module: /opt/watcom/lib286/dos/clibl.lib(fsync.c)
+0000:5053      fsync_
+Module: /opt/watcom/lib286/dos/clibl.lib(mem.c)
+0000:5060      __MemAllocator
+0000:5126      __MemFree
+Module: /opt/watcom/lib286/dos/clibl.lib(nmemneed.c)
+0000:529d      __nmemneed_
+Module: /opt/watcom/lib286/dos/clibl.lib(grownear.c)
+0000:531f      __LastFree_
+0000:5397      __ExpandDGROUP_
+Module: /opt/watcom/lib286/dos/clibl.lib(growseg.c)
+0000:549c      __GrowSeg_
+Module: /opt/watcom/lib286/dos/clibl.lib(allocseg.c)
+0000:556b      __AllocSeg_
+Module: /opt/watcom/lib286/dos/clibl.lib(fmemneed.c)
+0000:560a      __fmemneed_
+Module: /opt/watcom/lib286/dos/clibl.lib(heapgrow.c)
+0000:560d*     _heapgrow_
+0000:560d*     _fheapgrow_
+0000:560e      _nheapgrow_
+Module: /opt/watcom/lib286/dos/clibl.lib(_clse.c)
+0000:5685      __close_
+Module: /opt/watcom/lib286/dos/clibl.lib(ffree.c)
+0000:56ae*     _ffree_
+0000:56ae      free_
+Module: /opt/watcom/lib286/dos/clibl.lib(isatt.c)
+0000:56f6      isatty_
 Module: /opt/watcom/lib286/dos/clibl.lib(doserrno.c)
-0000:3a69*     __get_doserrno_ptr_
-03a9:0756      __doserrno
+0000:571c*     __get_doserrno_ptr_
+05a6:1b1a      __doserrno
+Module: /opt/watcom/lib286/dos/clibl.lib(alphabet.c)
+05a6:173c      ___Alphabet
+Module: /opt/watcom/lib286/dos/clibl.lib(mbinit.c)
+0000:578b      __mbinit_
+05a6:19b2+     ___MBCodePage
+Module: /opt/watcom/lib286/dos/clibl.lib(iomode.c)
+0000:5808      __GetIOMode_
+0000:582d      __SetIOMode_
+05a6:19b4+     ___NFiles
+05a6:19b6+     ___init_mode
+05a6:19de+     ___io_mode
+Module: /opt/watcom/lib286/dos/clibl.lib(filedos.c)
+0000:5850*     _dos_close_
+0000:585c      _dos_commit_
+Module: /opt/watcom/lib286/dos/clibl.lib(amblksiz.c)
+05a6:19e2      __amblksiz
+Module: /opt/watcom/lib286/dos/clibl.lib(heapen.c)
+0000:5869*     _heapenable_
+05a6:19e4      ___heap_enabled
+Module: /opt/watcom/lib286/dos/clibl.lib(sbrk.c)
+0000:587a      __brk_
+0000:58df*     sbrk_
+Module: /opt/watcom/lib286/dos/clibl.lib(nfree.c)
+0000:58ef      _nfree_
+05a6:1b1c+     ___MiniHeapFreeRover
+Module: /opt/watcom/lib286/dos/clibl.lib(mbisdbcs.c)
+05a6:19e6      ___IsDBCS
+Module: /opt/watcom/lib286/dos/clibl.lib(memset.c)
+0000:59ec      memset_
+Module: /opt/watcom/lib286/dos/clibl.lib(getltdos.c)
+0000:5a03      dos_get_dbcs_lead_table_
+Module: /opt/watcom/lib286/dos/clibl.lib(getcpdos.c)
+0000:5a2c      dos_get_code_page_
 Module: /opt/watcom/lib286/dos/clibl.lib(doserror)
-0000:3a70      __doserror_
-0000:3a7c*     __doserror1_
+0000:5a3c      __doserror_
+0000:5a48*     __doserror1_
 
 
                         +--------------------+
@@ -328,6 +374,6 @@ Module: /opt/watcom/lib286/dos/clibl.lib(doserror)
                         +-----------------------+
 
 Stack size:  0800 (2048.)
-Memory size:  49f0 (18928.)
-Entry point address: 0000:1200
-Link time: 00:00.13
+Memory size:  7d80 (32128.)
+Entry point address: 0000:2ebe
+Link time: 00:00.37

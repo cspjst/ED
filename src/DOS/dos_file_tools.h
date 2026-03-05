@@ -3,7 +3,12 @@
 
 #include "dos_file_types.h"
 #include "dos_error_types.h"
-#include "../STD/dos_stdint.h"
+
+#ifdef POLICY_USE_DOS_STDLIB
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
+#endif
 
 uint8_t dos_file_exists(const char* path_name);
 

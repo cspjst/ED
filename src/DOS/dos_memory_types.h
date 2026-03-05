@@ -1,7 +1,11 @@
 #ifndef DOS_MEMORY_TYPES_H
 #define DOS_MEMORY_TYPES_H
 
-#include "../STD/dos_stdint.h"
+#ifdef POLICY_USE_DOS_STDLIB
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
+#endif
 
 #pragma pack(1)
 typedef struct {

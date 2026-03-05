@@ -3,16 +3,12 @@
 
 #include "dos_memory_services.h"
 
-#ifdef USE_STDDOS
-
-#include "../STD/dos_stdio.h"
-#include "../STD/dos_assert.h"
-
+#ifdef POLICY_USE_STD_DOS
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_assert.h"
 #else
-
-#include <stdio.h>
-#include <assert.h>
-
+    #include <stdio.h>
+    #include <assert.h>
 #endif
 
 void test_allocate_memory(void) {

@@ -1,6 +1,11 @@
 #include "dos_stdlib.h"
-#include "dos_assert.h"
 #include "../DOS/dos_memory_services.h"
+
+#ifdef POLICY_USE_DOS_STDLIB
+    #include "dos_assert.h"
+#else
+    #include <assert.h>
+#endif
 
 void* dos_malloc(size_t size) {
     dos_address_t addr = {0};
