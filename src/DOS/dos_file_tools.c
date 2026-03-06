@@ -3,7 +3,7 @@
 #include "dos_file_services.h"
 #include "dos_file_types.h"
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stddef.h"
 #else
     #include <stddef.h>

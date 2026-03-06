@@ -5,14 +5,14 @@
 #include "../BIOS/bios_keyboard_scan_codes.h"
 #include "../BIOS/bios_keyboard_constants.h"
 
-#ifdef USE_STDDOS
+#ifdef POLICY_USE_DOS_STD
 
 #include "../STD/dos_stdio.h"
 #include "../STD/dos_assert.h"
 
 #else
 
-#include <stdio.h>
+#include <xstdio.h>
 #include <assert.h>
 
 #endif

@@ -10,7 +10,7 @@
 /*
 #include <errno.h>
 #include <assert.h>
-#include <stdio.h>
+#include <xstdio.h>
 #include <string.h>
 */
 

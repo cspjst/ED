@@ -1,7 +1,7 @@
 #ifndef DOS_SERVICES_FILES_TYPES_H
 #define DOS_SERVICES_FILES_TYPES_H
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>

@@ -9,7 +9,7 @@
     #error "This module requires large memory model (ie far data pointers)"
 #endif
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>

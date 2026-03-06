@@ -12,7 +12,7 @@
 #include "dos_memory_constants.h"
 #include "dos_memory_types.h"
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>

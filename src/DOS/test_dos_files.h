@@ -13,7 +13,7 @@
     #include "../STD/dos_assert.h"
 #else
     #include <stdint.h>
-    #include <stdio.h>
+    #include <xstdio.h>
     #include <string.h>
     #include <assert.h>
 #endif

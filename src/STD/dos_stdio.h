@@ -28,7 +28,7 @@
 #define DOS_STDIO_H
 
 #ifndef __LARGE__
-    //#error "This module requires large memory model (ie far data pointers)"
+    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #include "../DOS/dos_file_services.h"

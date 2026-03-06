@@ -1,8 +1,8 @@
-#ifdef USE_STDDOS
-    #include "../STD/dos_stdio.h"
-    #include "../STD/dos_assert.h"
+#ifdef POLICY_USE_DOS_STD
+    #include "STD/dos_stdio.h"
+    #include "STD/dos_assert.h"
 #else
-    #include <stdio.h>
+    #include <xstdio.h>
     #include <assert.h>
 #endif
 

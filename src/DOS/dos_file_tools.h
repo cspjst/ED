@@ -4,7 +4,7 @@
 #include "dos_file_types.h"
 #include "dos_error_types.h"
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>

@@ -4,7 +4,7 @@
 #include "sno.h"
 #include <assert.h>
 #include <string.h>
-#include <stdio.h>
+#include <xstdio.h>
 #include <limits.h>
 
 void test_bind(void) {

@@ -11,7 +11,7 @@
  */
 
 #ifndef __LARGE__
-    //#error "This module requires large memory model (far data pointers)"
+    #error "This module requires large memory model (far data pointers)"
 #endif
 
 /* va_list is a NEAR pointer into the current stack frame (SS) */

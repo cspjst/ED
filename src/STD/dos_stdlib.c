@@ -1,7 +1,7 @@
 #include "dos_stdlib.h"
 #include "../DOS/dos_memory_services.h"
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #include "dos_assert.h"
 #else
     #include <assert.h>

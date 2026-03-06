@@ -15,7 +15,7 @@
         exit(1)))
 #endif
 
-#ifdef POLICY_USE_DOS_STDLIB
+#ifdef POLICY_USE_DOS_STD
     #define assert  dos_assert
 #endif
 
