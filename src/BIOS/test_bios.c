@@ -12,7 +12,7 @@
 
 #else
 
-#include <xstdio.h>
+#include <stdio.h>
 #include <assert.h>
 
 #endif

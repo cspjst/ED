@@ -7,7 +7,7 @@
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_assert.h"
 #else
-    #include <xstdio.h>
+    #include <stdio.h>
     #include <assert.h>
 #endif
 
