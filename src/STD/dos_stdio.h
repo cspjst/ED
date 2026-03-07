@@ -34,10 +34,6 @@
 #include "../DOS/dos_file_services.h"
 #include "dos_stddef.h"
 
-#define DOS_STDIO_PRINTF_FLOAT
-#define DOS_STDIO_PRINTF_SCIENTIFIC
-#define DOS_STDIO_FILE_HANDLING
-
 #define EOF (-1)
 
 #define SEEK_SET FSEEK_SET

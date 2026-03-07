@@ -25,7 +25,7 @@ add_compile_options(
     # === REQUIRED (always on) ===
     -0                  # 8086/8088 instructions ONLY
     -bt=dos             # Target DOS
-    -l=dos              # Link DOS library
+    #-l=dos              # Link DOS library
 
     # === MEMORY MODEL (pick ONE) ===
     -ml                 # Large model: far data pointers (flexible)
@@ -33,17 +33,21 @@ add_compile_options(
 
     # === SIZE vs SPEED (pick ONE) ===
     -os                 # Optimize for CODE SIZE
+    -ox                 # Enable extra optimizations (dead code elimination)
+    -zp1                # Pack structs to 1-byte alignment (Critical for data size)
+    -fpi87              # Assume 8087 exists (removes software FP emulation stubs if any are pulled in)
     # -ot               # Optimize for SPEED
     # -od               # Disable optimizations (debugging)
 
+
     # === DEBUG/INFO ===
-    #-d0                 # No debug info (smaller .obj + binary)
+    -d0                 # No debug info (smaller .obj + binary)
     # -d1               # Line numbers only
-    -d2               # Full debug symbols
+    # -d2               # Full debug symbols
 
     # === STACK SAFETY ===
-    #-e0                 # No stack checking (saves ~20 bytes)
-    -e1               # Minimal stack overflow check
+    -e0                 # No stack checking (saves ~20 bytes)
+    #-e1               # Minimal stack overflow check
 
     # === LANGUAGE COMPAT ===
     -za99               # Partial C99 (va_arg, etc.)
@@ -63,6 +67,7 @@ add_definitions(
     -D__8086__  # Explicit 8086 target
     -DPOLICY_USE_DOS_STD
   )
+
 endif()
 
 # WARNING: Using GLOB for convenience. If adding new files, rerun: ./cmk.sh
@@ -71,7 +76,7 @@ file(GLOB SOURCES
     *.c
     BIOS/*.c
     DOS/*.c
-    ED/*.c
+    # ED/*.c
     # SNO/*.c
     STD/*.c
 )

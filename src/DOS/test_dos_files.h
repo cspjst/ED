@@ -1,14 +1,9 @@
 #ifndef TEST_DOS_FILES_H
 #define TEST_DOS_FILES_H
 
-#include "dos_file_tools.h"
-#include "dos_file_services.h"
-#include "dos_error_types.h"
-#include "dos_file_services.h"
-
 #ifdef POLICY_USE_DOS_STD
-    #include "../STD/dos_stdint.h"
     #include "../STD/dos_stdio.h"
+    #include "../STD/dos_stdint.h"
     #include "../STD/dos_string.h"
     #include "../STD/dos_assert.h"
 #else
@@ -17,6 +12,13 @@
     #include <string.h>
     #include <assert.h>
 #endif
+
+#include "dos_file_tools.h"
+#include "dos_file_services.h"
+#include "dos_error_types.h"
+#include "dos_file_services.h"
+
+
 
 void test_dos_files() {
     printf("Testing DOS File Functions...\n");

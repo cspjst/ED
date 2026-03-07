@@ -18,8 +18,11 @@
 
 int main() {
 
+#ifdef POLICY_USE_DOS_STD
+    printf("POLICY_USE_DOS_STD Test Harness\n");
+#else
     printf("Test Harness\n");
-
+#endif
     // BIOS
     //test_bios_memory();
     //test_bios_keys();
@@ -27,7 +30,7 @@ int main() {
     // DOS
     //test_dos_memory();
     //test_dos_services();
-    test_dos_files();
+    //test_dos_files();
 
     // STD
     //test_stdio();

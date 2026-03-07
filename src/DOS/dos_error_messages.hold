@@ -1,0 +1,15 @@
+/*
+* @brief  DOS Error Codes, Error Code Classes, Error Code Action Codes and Locus
+ *
+ * Of the following error codes, only error codes 1-12 are returned in AX upon exit from interrupt 21 or 24.
+ * The rest are obtained by issuing the "get extended error" function call.
+ * @see INT 21,59
+*/
+#ifndef DOS_ERROR_MESSAGES_H
+#define DOS_ERROR_MESSAGES_H
+
+#define MAX_ERR_STRING_LEN  64
+
+const char* dos_get_error_message(unsigned char code);
+
+#endif

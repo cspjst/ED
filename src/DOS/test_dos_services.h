@@ -1,8 +1,6 @@
 #ifndef TEST_SERVICES_H
 #define TEST_SERVICES_H
 
-#include "dos_services.h"
-
 #ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_assert.h"
@@ -10,6 +8,8 @@
     #include <stdio.h>
     #include <assert.h>
 #endif
+
+#include "dos_services.h"
 
 /* Safe interrupt vectors for testing (60h-67h are user-available in DOS) */
 #define TEST_VECTOR_1 0x60

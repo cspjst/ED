@@ -1,8 +1,6 @@
 #ifndef TEST_MEMORY_H
 #define TEST_MEMORY_H
 
-#include "dos_memory_services.h"
-
 #ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_assert.h"
@@ -10,6 +8,8 @@
     #include <stdio.h>
     #include <assert.h>
 #endif
+
+#include "dos_memory_services.h"
 
 void test_allocate_memory(void) {
 

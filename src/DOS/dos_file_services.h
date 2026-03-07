@@ -1,3 +1,9 @@
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
+#endif
+
 /**
  * @url https://www.stanislavs.org/helppc/
  */
@@ -10,12 +16,6 @@
 
 #include "dos_error_types.h"
 #include "dos_file_types.h"
-
-#ifdef POLICY_USE_DOS_STD
-    #include "../STD/dos_stdint.h"
-#else
-    #include <stdint.h>
-#endif
 
 // 36  Get disk free space
 dos_error_code_t dos_get_disk_free_space(uint8_t drive_number, dos_file_disk_space_info_t* info);
