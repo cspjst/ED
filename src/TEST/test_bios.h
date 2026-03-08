@@ -1,3 +1,6 @@
+#ifndef TEST_BIOS_H
+#define TEST_BIOS_H
+
 
 #ifdef POLICY_USE_DOS_STD
     #include "../STD/dos_stdio.h"
@@ -6,8 +9,6 @@
     #include <stdio.h>
     #include <assert.h>
 #endif
-
-#include "test_bios.h"
 
 #include "../BIOS/bios_memory_services.h"
 #include "../BIOS/bios_keyboard_services.h"
@@ -155,3 +156,6 @@ void test_bios_keys() {
         }
     }
 }
+
+
+#endif

@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_COMPILER_WORKS 1)
 
 project(
-    ED
+    TEST
     VERSION 0.1.0
     LANGUAGES C
 )
@@ -75,15 +75,10 @@ file(GLOB SOURCES
     *.c
     BIOS/*.c
     DOS/*.c
-    # ED/*.c
-    # SNO/*.c
     STD/*.c
+    TEST/*.c
 )
 
 # message(Source list="${SOURCES}")
 
-add_executable(ED ${SOURCES})
-
-# Optional: Install target
-# rename me...
-#install(TARGETS snoc DESTINATION bin)
+add_executable(TEST ${SOURCES})

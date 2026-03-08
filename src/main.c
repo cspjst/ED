@@ -6,15 +6,15 @@
     #include <assert.h>
 #endif
 
-#include "BIOS/test_bios.h"
-#include "DOS/test_dos_memory.h"
-#include "DOS/test_dos_services.h"
-#include "DOS/test_dos_files.h"
-//#include "STD/test_stdio.h"
-//#include "STD/test_string.h"
-//#include "STD/test_files.h"
-//#include "STD/test_stdlib.h"
-//#include "STD/dos_stdio.h"
+#include "TEST/test_bios.h"
+//#include "TEST/test_dos_memory.h"
+//#include "TEST/test_dos_services.h"
+//#include "TEST/test_dos_files.h"
+//#include "TEST/test_stdio.h"
+//#include "TEST/test_string.h"
+//#include "TEST/test_files.h"
+//#include "TEST/test_stdlib.h"
+//#include "TEST/dos_stdio.h"
 
 int main() {
 
@@ -24,8 +24,8 @@ int main() {
     printf("Test Harness\n");
 #endif
     // BIOS
-    //test_bios_memory();
-    //test_bios_keys();
+    test_bios_memory();
+    test_bios_keys();
 
     // DOS
     //test_dos_memory();
