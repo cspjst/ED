@@ -39,7 +39,6 @@ add_compile_options(
     # -ot               # Optimize for SPEED
     # -od               # Disable optimizations (debugging)
 
-
     # === DEBUG/INFO ===
     -d0                 # No debug info (smaller .obj + binary)
     # -d1               # Line numbers only
@@ -66,7 +65,7 @@ add_definitions(
     -D__DOS__
     -D__8086__  # Explicit 8086 target
     -DPOLICY_USE_DOS_STD
-  )
+)
 
 endif()
 
