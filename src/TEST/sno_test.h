@@ -1,582 +1,582 @@
-#ifndef sno_TEST_H
-#define sno_TEST_H
+#ifndef SNO_TEST_H
+#define SNO_TEST_H
 
-#include "sno.h"
+#include "../SNO/sno.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
 #include <limits.h>
 
 void test_bind(void) {
-    sno_view_t v = sno_bind("TEST");
-    assert(v.begin && v.end && sno_size(v) == 4);
+    view_t v = bind("TEST");
+    assert(v.begin && v.end && size(v) == 4);
 
-    v = sno_bind("");
-    assert(v.begin && v.begin == v.end && sno_size(v) == 0);
+    v = bind("");
+    assert(v.begin && v.begin == v.end && size(v) == 0);
 
-    v = sno_bind(NULL);
-    assert(!v.begin && !v.end && sno_size(v) == 0);
+    v = bind(NULL);
+    assert(!v.begin && !v.end && size(v) == 0);
 }
 
 void test_view(void) {
     char buf[] = "HELLO";
 
-    sno_view_t v = sno_view(&buf[1], &buf[4]);
-    assert(v.begin == &buf[1] && v.end == &buf[4] && sno_size(v) == 3);
+    view_t v = view(&buf[1], &buf[4]);
+    assert(v.begin == &buf[1] && v.end == &buf[4] && size(v) == 3);
 
-    v = sno_view(buf, buf);
-    assert(sno_size(v) == 0);
+    v = view(buf, buf);
+    assert(size(v) == 0);
 
-    v = sno_view(NULL, buf);
+    v = view(NULL, buf);
     assert(!v.begin && v.end == buf);
 
-    v = sno_view(buf, NULL);
+    v = view(buf, NULL);
     assert(v.begin == buf && !v.end);
 
-    v = sno_view(NULL, NULL);
+    v = view(NULL, NULL);
     assert(!v.begin && !v.end);
 
-    v = sno_view(&buf[3], &buf[1]);
+    v = view(&buf[3], &buf[1]);
     assert(v.begin == &buf[3] && v.end == &buf[1]);
 }
 
 void test_size(void) {
-    assert(sno_size(sno_bind("ABC")) == 3);
-    assert(sno_size(sno_view("X", "X")) == 0);
-    assert(sno_size(sno_view(NULL, "TEST")) == 0);
-    assert(sno_size(sno_view("TEST", NULL)) == 0);
-    assert(sno_size(sno_view(NULL, NULL)) == 0);
+    assert(size(bind("ABC")) == 3);
+    assert(size(view("X", "X")) == 0);
+    assert(size(view(NULL, "TEST")) == 0);
+    assert(size(view("TEST", NULL)) == 0);
+    assert(size(view(NULL, NULL)) == 0);
 
     char s[] = "TEST";
-    int sz = sno_size(sno_view(&s[3], &s[1]));
+    int sz = size(view(&s[3], &s[1]));
     assert(sz >= 0);
 
-    assert(sno_size(sno_bind(NULL)) == 0);
+    assert(size(bind(NULL)) == 0);
 }
 
 void test_lit(void) {
     char input[] = "HELLO";
-    sno_view_t sub = sno_bind(input);
-    assert(sno_lit(&sub, sno_bind("HEL")) && sub.begin == input + 3 && *sub.begin == 'L');
+    view_t sub = bind(input);
+    assert(lit(&sub, bind("HEL")) && sub.begin == input + 3 && *sub.begin == 'L');
 
-    sub = sno_bind("TEST");
-    sno_cursor_t orig = sub.begin;
-    assert(!sno_lit(&sub, sno_bind("FAIL")) && sub.begin == orig);
+    sub = bind("TEST");
+    cursor_t orig = sub.begin;
+    assert(!lit(&sub, bind("FAIL")) && sub.begin == orig);
 
-    sub = sno_bind("ANY");
+    sub = bind("ANY");
     orig = sub.begin;
-    assert(sno_lit(&sub, sno_bind("")) && sub.begin == orig);
+    assert(lit(&sub, bind("")) && sub.begin == orig);
 
-    sub = sno_bind("HI");
+    sub = bind("HI");
     orig = sub.begin;
-    assert(!sno_lit(&sub, sno_bind("HELLO")) && sub.begin == orig);
+    assert(!lit(&sub, bind("HELLO")) && sub.begin == orig);
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_lit(&sub, sno_bind("X")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!lit(&sub, bind("X")) && !sub.begin && !sub.end);
 
-    sub = sno_bind("SAFE");
+    sub = bind("SAFE");
     orig = sub.begin;
-    assert(!sno_lit(&sub, sno_view(NULL, NULL)) && sub.begin == orig);
+    assert(!lit(&sub, view(NULL, NULL)) && sub.begin == orig);
 
-    sub = sno_view(&input[3], &input[1]);
+    sub = view(&input[3], &input[1]);
     orig = sub.begin;
-    assert(!sno_lit(&sub, sno_bind("X")) && sub.begin == orig);
+    assert(!lit(&sub, bind("X")) && sub.begin == orig);
 
-    sub = sno_bind("");
+    sub = bind("");
     orig = sub.begin;
-    assert(!sno_lit(&sub, sno_bind("X")) && sub.begin == orig);
+    assert(!lit(&sub, bind("X")) && sub.begin == orig);
 
-    sub = sno_bind("Hello");
+    sub = bind("Hello");
     orig = sub.begin;
-    assert(!sno_lit(&sub, sno_bind("HELLO")) && sub.begin == orig);
+    assert(!lit(&sub, bind("HELLO")) && sub.begin == orig);
 }
 
 void test_any(void) {
-    sno_view_t sub;
-    sno_cursor_t orig;
+    view_t sub;
+    cursor_t orig;
 
     char buf1[] = "XYZ";
-    sub = sno_bind(buf1);
+    sub = bind(buf1);
     orig = sub.begin;
-    assert(sno_any(&sub, sno_bind("XYZ")) && sub.begin == orig + 1 && *sub.begin == 'Y');
+    assert(any(&sub, bind("XYZ")) && sub.begin == orig + 1 && *sub.begin == 'Y');
 
     char buf2[] = "!5";
-    sub = sno_bind(buf2);
+    sub = bind(buf2);
     orig = sub.begin;
-    assert(sno_any(&sub, sno_bind("!@#$%")) && sub.begin == orig + 1 && *sub.begin == '5');
+    assert(any(&sub, bind("!@#$%")) && sub.begin == orig + 1 && *sub.begin == '5');
 
     char buf3[] = "X";
-    sub = sno_bind(buf3);
+    sub = bind(buf3);
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("ABC")) && sub.begin == orig);
+    assert(!any(&sub, bind("ABC")) && sub.begin == orig);
 
-    sub = sno_bind("");
+    sub = bind("");
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!any(&sub, bind("A")) && sub.begin == orig);
 
     char buf4[] = "A";
-    sub = sno_bind(buf4);
+    sub = bind(buf4);
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("")) && sub.begin == orig);
+    assert(!any(&sub, bind("")) && sub.begin == orig);
 
-    assert(!sno_any(NULL, sno_bind("A")));
+    assert(!any(NULL, bind("A")));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_any(&sub, sno_bind("A")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!any(&sub, bind("A")) && !sub.begin && !sub.end);
 
     char buf5[] = "A";
-    sub = sno_view(buf5, NULL);
+    sub = view(buf5, NULL);
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("A")) && sub.begin == orig && sub.end == NULL);
+    assert(!any(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
 
     char buf6[] = "A";
-    sub = sno_view(NULL, buf6);
-    assert(!sno_any(&sub, sno_bind("A")) && !sub.begin && sub.end == buf6);
+    sub = view(NULL, buf6);
+    assert(!any(&sub, bind("A")) && !sub.begin && sub.end == buf6);
 
     char buf7[] = "a";
-    sub = sno_bind(buf7);
+    sub = bind(buf7);
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!any(&sub, bind("A")) && sub.begin == orig);
 
     char buf8[] = "AAA";
-    sub = sno_bind(buf8);
+    sub = bind(buf8);
     orig = sub.begin;
-    assert(sno_any(&sub, sno_bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
+    assert(any(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
 
     char buf9[] = "123abc";
-    sub = sno_bind(buf9);
+    sub = bind(buf9);
     int count = 0;
-    while (sno_any(&sub, sno_bind("0123456789"))) count++;
+    while (any(&sub, bind("0123456789"))) count++;
     assert(count == 3 && strncmp(sub.begin, "abc", 3) == 0);
 
     char buf10[] = "Z";
-    sub = sno_bind(buf10);
-    assert(sno_any(&sub, sno_bind("Z")) && sub.begin == sub.end);
+    sub = bind(buf10);
+    assert(any(&sub, bind("Z")) && sub.begin == sub.end);
 
     char buf11[] = "!!!END";
-    sub = sno_bind(buf11);
+    sub = bind(buf11);
     orig = sub.begin;
-    assert(sno_any(&sub, sno_bind("!")) && sub.begin == orig + 1 && *sub.begin == '!');
+    assert(any(&sub, bind("!")) && sub.begin == orig + 1 && *sub.begin == '!');
 
     char buf12[] = "!!!END";
-    sub = sno_view(&buf12[2], &buf12[0]);
+    sub = view(&buf12[2], &buf12[0]);
     orig = sub.begin;
-    assert(!sno_any(&sub, sno_bind("!")) && sub.begin == orig);
+    assert(!any(&sub, bind("!")) && sub.begin == orig);
 }
 
 void test_notany(void) {
-    sno_view_t sub;
-    sno_cursor_t orig;
+    view_t sub;
+    cursor_t orig;
 
     char buf1[] = "X9Z";
-    sub = sno_bind(buf1);
+    sub = bind(buf1);
     orig = sub.begin;
-    assert(sno_notany(&sub, sno_bind("012345678")) && sub.begin == orig + 1 && *sub.begin == '9');
+    assert(notany(&sub, bind("012345678")) && sub.begin == orig + 1 && *sub.begin == '9');
 
     char buf2[] = "A";
-    sub = sno_bind(buf2);
+    sub = bind(buf2);
     orig = sub.begin;
-    assert(sno_notany(&sub, sno_bind("")) && sub.begin == orig + 1 && sub.begin == sub.end);
+    assert(notany(&sub, bind("")) && sub.begin == orig + 1 && sub.begin == sub.end);
 
     char buf3[] = "5";
-    sub = sno_bind(buf3);
+    sub = bind(buf3);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind("0123456789")) && sub.begin == orig);
+    assert(!notany(&sub, bind("0123456789")) && sub.begin == orig);
 
     char buf4[] = "";
-    sub = sno_bind(buf4);
+    sub = bind(buf4);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!notany(&sub, bind("A")) && sub.begin == orig);
 
     char buf5[] = "Z";
-    sub = sno_bind(buf5);
-    assert(sno_notany(&sub, sno_bind("ABC")) && sub.begin == sub.end);
+    sub = bind(buf5);
+    assert(notany(&sub, bind("ABC")) && sub.begin == sub.end);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!notany(&sub, bind("A")) && sub.begin == orig);
 
-    assert(!sno_notany(NULL, sno_bind("A")));
+    assert(!notany(NULL, bind("A")));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_notany(&sub, sno_bind("A")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!notany(&sub, bind("A")) && !sub.begin && !sub.end);
 
     char buf6[] = "A";
-    sub = sno_view(buf6, NULL);
+    sub = view(buf6, NULL);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind("A")) && sub.begin == orig && sub.end == NULL);
+    assert(!notany(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
 
     char buf7[] = "A";
-    sub = sno_view(NULL, buf7);
-    assert(!sno_notany(&sub, sno_bind("A")) && !sub.begin && sub.end == buf7);
+    sub = view(NULL, buf7);
+    assert(!notany(&sub, bind("A")) && !sub.begin && sub.end == buf7);
 
     char buf8[] = "a";
-    sub = sno_bind(buf8);
+    sub = bind(buf8);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind("a")) && sub.begin == orig);
+    assert(!notany(&sub, bind("a")) && sub.begin == orig);
 
     char buf9[] = "FIELD,REST";
-    sub = sno_bind(buf9);
-    while (sno_notany(&sub, sno_bind(","))) ;
+    sub = bind(buf9);
+    while (notany(&sub, bind(","))) ;
     assert(*sub.begin == ',');
 
     char buf10[] = "FIELD,REST";
-    sub = sno_view(&buf10[2], &buf10[0]);
+    sub = view(&buf10[2], &buf10[0]);
     orig = sub.begin;
-    assert(!sno_notany(&sub, sno_bind(",")) && sub.begin == orig);
+    assert(!notany(&sub, bind(",")) && sub.begin == orig);
 }
 
 void test_span(void) {
-    sno_view_t sub;
-    sno_cursor_t orig;
+    view_t sub;
+    cursor_t orig;
 
     char buf1[] = "A123";
-    sub = sno_bind(buf1);
+    sub = bind(buf1);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("A")) && sub.begin == orig + 1 && *sub.begin == '1');
+    assert(span(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == '1');
 
     char buf2[] = "12345abc";
-    sub = sno_bind(buf2);
+    sub = bind(buf2);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("0123456789")) && sub.begin == orig + 5 && *sub.begin == 'a');
+    assert(span(&sub, bind("0123456789")) && sub.begin == orig + 5 && *sub.begin == 'a');
 
     char buf3[] = "999";
-    sub = sno_bind(buf3);
-    assert(sno_span(&sub, sno_bind("0123456789")) && sub.begin == sub.end);
+    sub = bind(buf3);
+    assert(span(&sub, bind("0123456789")) && sub.begin == sub.end);
 
     char buf4[] = "X123";
-    sub = sno_bind(buf4);
+    sub = bind(buf4);
     orig = sub.begin;
-    assert(!sno_span(&sub, sno_bind("0123456789")) && sub.begin == orig);
+    assert(!span(&sub, bind("0123456789")) && sub.begin == orig);
 
     char buf5[] = "";
-    sub = sno_bind(buf5);
+    sub = bind(buf5);
     orig = sub.begin;
-    assert(!sno_span(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!span(&sub, bind("A")) && sub.begin == orig);
 
     char buf6[] = "A";
-    sub = sno_bind(buf6);
+    sub = bind(buf6);
     orig = sub.begin;
-    assert(!sno_span(&sub, sno_bind("")) && sub.begin == orig);
+    assert(!span(&sub, bind("")) && sub.begin == orig);
 
     char buf7[] = "aaaabbb";
-    sub = sno_bind(buf7);
+    sub = bind(buf7);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    assert(span(&sub, bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
 
     char buf8[] = "321cba";
-    sub = sno_bind(buf8);
+    sub = bind(buf8);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("abc123")) && sub.begin == orig + 6 && sub.begin == sub.end);
+    assert(span(&sub, bind("abc123")) && sub.begin == orig + 6 && sub.begin == sub.end);
 
     char buf9[] = "aAaA";
-    sub = sno_bind(buf9);
+    sub = bind(buf9);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("a")) && sub.begin == orig + 1 && *sub.begin == 'A');
+    assert(span(&sub, bind("a")) && sub.begin == orig + 1 && *sub.begin == 'A');
 
     char buf10[] = "123,456,789";
-    sub = sno_bind(buf10);
-    assert(sno_span(&sub, sno_bind("0123456789")) && sno_lit(&sub, sno_bind(",")) && sno_span(&sub, sno_bind("0123456789")) && *sub.begin == ',');
+    sub = bind(buf10);
+    assert(span(&sub, bind("0123456789")) && lit(&sub, bind(",")) && span(&sub, bind("0123456789")) && *sub.begin == ',');
 
-    assert(!sno_span(NULL, sno_bind("A")));
+    assert(!span(NULL, bind("A")));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_span(&sub, sno_bind("A")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!span(&sub, bind("A")) && !sub.begin && !sub.end);
 
     char buf11[] = "A";
-    sub = sno_view(buf11, NULL);
+    sub = view(buf11, NULL);
     orig = sub.begin;
-    assert(!sno_span(&sub, sno_bind("A")) && sub.begin == orig && sub.end == NULL);
+    assert(!span(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
 
     char buf12[] = "A";
-    sub = sno_view(NULL, buf12);
-    assert(!sno_span(&sub, sno_bind("A")) && !sub.begin && sub.end == buf12);
+    sub = view(NULL, buf12);
+    assert(!span(&sub, bind("A")) && !sub.begin && sub.end == buf12);
 
     char buf13[] = "Z";
-    sub = sno_bind(buf13);
-    assert(sno_span(&sub, sno_bind("Z")) && sub.begin == sub.end);
+    sub = bind(buf13);
+    assert(span(&sub, bind("Z")) && sub.begin == sub.end);
 
     char buf14[] = "AAA";
-    sub = sno_bind(buf14);
+    sub = bind(buf14);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("A")) && sub.begin == orig + 3);
-    sub = sno_bind(buf14);
+    assert(span(&sub, bind("A")) && sub.begin == orig + 3);
+    sub = bind(buf14);
     orig = sub.begin;
-    assert(sno_span(&sub, sno_bind("XYZA")) && sub.begin == orig + 3);
+    assert(span(&sub, bind("XYZA")) && sub.begin == orig + 3);
 
     char buf15[] = "AAA";
-    sub = sno_view(&buf15[2], &buf15[0]);
+    sub = view(&buf15[2], &buf15[0]);
     orig = sub.begin;
-    assert(!sno_span(&sub, sno_bind("A")) && sub.begin == orig);
+    assert(!span(&sub, bind("A")) && sub.begin == orig);
 }
 
-void test_break(void) {
-    sno_view_t sub;
-    sno_cursor_t orig;
+void test_brk(void) {
+    view_t sub;
+    cursor_t orig;
 
     char buf1[] = "FIELD,REST";
-    sub = sno_bind(buf1);
+    sub = bind(buf1);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind(",")) && sub.begin == orig + 5 && *sub.begin == ',');
+    assert(brk(&sub, bind(",")) && sub.begin == orig + 5 && *sub.begin == ',');
 
     char buf2[] = ",REST";
-    sub = sno_bind(buf2);
+    sub = bind(buf2);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind(",")) && sub.begin == orig && *sub.begin == ',');
+    assert(brk(&sub, bind(",")) && sub.begin == orig && *sub.begin == ',');
 
     char buf3[] = "FIELD";
-    sub = sno_bind(buf3);
-    assert(sno_break(&sub, sno_bind(",")) && sub.begin == sub.end);
+    sub = bind(buf3);
+    assert(brk(&sub, bind(",")) && sub.begin == sub.end);
 
     char buf4[] = "";
-    sub = sno_bind(buf4);
-    assert(sno_break(&sub, sno_bind(",")) && sub.begin == sub.end);
+    sub = bind(buf4);
+    assert(brk(&sub, bind(",")) && sub.begin == sub.end);
 
     char buf5[] = "TEST";
-    sub = sno_bind(buf5);
-    assert(sno_break(&sub, sno_bind("")) && sub.begin == sub.end);
+    sub = bind(buf5);
+    assert(brk(&sub, bind("")) && sub.begin == sub.end);
 
     char buf6[] = "aaaabbb";
-    sub = sno_bind(buf6);
+    sub = bind(buf6);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("b")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    assert(brk(&sub, bind("b")) && sub.begin == orig + 4 && *sub.begin == 'b');
 
     char buf7[] = "aAaA";
-    sub = sno_bind(buf7);
+    sub = bind(buf7);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
+    assert(brk(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
 
     char buf8[] = "123,456,789";
-    sub = sno_bind(buf8);
-    assert(sno_break(&sub, sno_bind(",")) && sno_any(&sub, sno_bind(",")) && sno_break(&sub, sno_bind(",")) && sno_any(&sub, sno_bind(",")) && sno_break(&sub, sno_bind(",")) && sub.begin == sub.end);
+    sub = bind(buf8);
+    assert(brk(&sub, bind(",")) && any(&sub, bind(",")) && brk(&sub, bind(",")) && any(&sub, bind(",")) && brk(&sub, bind(",")) && sub.begin == sub.end);
 
-    assert(!sno_break(NULL, sno_bind(",")));
+    assert(!brk(NULL, bind(",")));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_break(&sub, sno_bind(",")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!brk(&sub, bind(",")) && !sub.begin && !sub.end);
 
     char buf9[] = "A";
-    sub = sno_view(buf9, NULL);
+    sub = view(buf9, NULL);
     orig = sub.begin;
-    assert(!sno_break(&sub, sno_bind(",")) && sub.begin == orig && sub.end == NULL);
+    assert(!brk(&sub, bind(",")) && sub.begin == orig && sub.end == NULL);
 
     char buf10[] = "A";
-    sub = sno_view(NULL, buf10);
-    assert(!sno_break(&sub, sno_bind(",")) && !sub.begin && sub.end == buf10);
+    sub = view(NULL, buf10);
+    assert(!brk(&sub, bind(",")) && !sub.begin && sub.end == buf10);
 
     char buf11[] = "Z";
-    sub = sno_bind(buf11);
-    assert(sno_break(&sub, sno_bind("A")) && sub.begin == sub.end);
+    sub = bind(buf11);
+    assert(brk(&sub, bind("A")) && sub.begin == sub.end);
 
     char buf12[] = "ABcDE";
-    sub = sno_bind(buf12);
+    sub = bind(buf12);
     orig = sub.begin;
-    assert(sno_break(&sub, sno_bind("c")) && sub.begin == orig + 2 && *sub.begin == 'c');
+    assert(brk(&sub, bind("c")) && sub.begin == orig + 2 && *sub.begin == 'c');
 }
 
 void test_skip(void) {
-    sno_view_t sub;
-    sno_cursor_t orig;
+    view_t sub;
+    cursor_t orig;
 
     char buf1[] = "   TEXT";
-    sub = sno_bind(buf1);
+    sub = bind(buf1);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind(" \t")) && sub.begin == orig + 3 && *sub.begin == 'T');
+    assert(skip(&sub, bind(" \t")) && sub.begin == orig + 3 && *sub.begin == 'T');
 
     char buf2[] = "TEXT";
-    sub = sno_bind(buf2);
+    sub = bind(buf2);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind(" \t")) && sub.begin == orig && *sub.begin == 'T');
+    assert(skip(&sub, bind(" \t")) && sub.begin == orig && *sub.begin == 'T');
 
     char buf3[] = "";
-    sub = sno_bind(buf3);
+    sub = bind(buf3);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind(" ")) && sub.begin == orig);
+    assert(skip(&sub, bind(" ")) && sub.begin == orig);
 
     char buf4[] = "TEXT";
-    sub = sno_bind(buf4);
+    sub = bind(buf4);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind("")) && sub.begin == orig);
+    assert(skip(&sub, bind("")) && sub.begin == orig);
 
     char buf5[] = "   TEXT";
-    sub = sno_bind(buf5);
-    assert(sno_skip(&sub, sno_bind(" ")));
+    sub = bind(buf5);
+    assert(skip(&sub, bind(" ")));
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind(" ")) && sub.begin == orig);
+    assert(skip(&sub, bind(" ")) && sub.begin == orig);
 
     char buf6[] = "15L";
-    sub = sno_bind(buf6);
-    sno_skip(&sub, sno_bind(" \t"));
-    assert(sno_span(&sub, sno_bind("0123456789")) && sno_lit(&sub, sno_bind("L")));
+    sub = bind(buf6);
+    skip(&sub, bind(" \t"));
+    assert(span(&sub, bind("0123456789")) && lit(&sub, bind("L")));
 
     char buf7[] = "  15L";
-    sub = sno_bind(buf7);
-    sno_skip(&sub, sno_bind(" \t"));
-    assert(sno_span(&sub, sno_bind("0123456789")) && sno_lit(&sub, sno_bind("L")));
+    sub = bind(buf7);
+    skip(&sub, bind(" \t"));
+    assert(span(&sub, bind("0123456789")) && lit(&sub, bind("L")));
 
     char buf8[] = "aaaabbb";
-    sub = sno_bind(buf8);
+    sub = bind(buf8);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    assert(skip(&sub, bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
 
-    assert(!sno_skip(NULL, sno_bind(" ")));
+    assert(!skip(NULL, bind(" ")));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_skip(&sub, sno_bind(" ")) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!skip(&sub, bind(" ")) && !sub.begin && !sub.end);
 
     char buf9[] = "A";
-    sub = sno_view(buf9, NULL);
+    sub = view(buf9, NULL);
     orig = sub.begin;
-    assert(!sno_skip(&sub, sno_bind(" ")) && sub.begin == orig && sub.end == NULL);
+    assert(!skip(&sub, bind(" ")) && sub.begin == orig && sub.end == NULL);
 
     char buf10[] = "A";
-    sub = sno_view(NULL, buf10);
-    assert(!sno_skip(&sub, sno_bind(" ")) && !sub.begin && sub.end == buf10);
+    sub = view(NULL, buf10);
+    assert(!skip(&sub, bind(" ")) && !sub.begin && sub.end == buf10);
 
     char buf11[] = "   ";
-    sub = sno_bind(buf11);
-    assert(sno_skip(&sub, sno_bind(" ")) && sub.begin == sub.end);
+    sub = bind(buf11);
+    assert(skip(&sub, bind(" ")) && sub.begin == sub.end);
 
     char buf12[] = "\t  \tTEXT";
-    sub = sno_bind(buf12);
+    sub = bind(buf12);
     orig = sub.begin;
-    assert(sno_skip(&sub, sno_bind(" \t")) && sub.begin == orig + 4 && *sub.begin == 'T');
+    assert(skip(&sub, bind(" \t")) && sub.begin == orig + 4 && *sub.begin == 'T');
 }
 
 void test_var(void) {
     char buf[20];
-    sno_view_t sub;
+    view_t sub;
 
-    sub = sno_bind("TEST");
-    assert(sno_var(&sub, buf, sizeof(buf)) && strcmp(buf, "TEST") == 0 && sub.begin == sub.end);
+    sub = bind("TEST");
+    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "TEST") == 0 && sub.begin == sub.end);
 
-    sub = sno_bind("");
-    assert(sno_var(&sub, buf, sizeof(buf)) && buf[0] == '\0' && sub.begin == sub.end);
+    sub = bind("");
+    assert(var(&sub, buf, sizeof(buf)) && buf[0] == '\0' && sub.begin == sub.end);
 
-    sub = sno_bind("12345");
-    sno_cursor_t orig = sub.begin;
-    assert(!sno_var(&sub, buf, 5) && sub.begin == orig);
+    sub = bind("12345");
+    cursor_t orig = sub.begin;
+    assert(!var(&sub, buf, 5) && sub.begin == orig);
 
-    sub = sno_bind("ABC");
+    sub = bind("ABC");
     orig = sub.begin;
-    assert(!sno_var(&sub, buf, 3) && sub.begin == orig);
+    assert(!var(&sub, buf, 3) && sub.begin == orig);
 
-    sub = sno_bind("X");
+    sub = bind("X");
     orig = sub.begin;
-    assert(!sno_var(&sub, buf, 0) && sub.begin == orig);
+    assert(!var(&sub, buf, 0) && sub.begin == orig);
 
-    sub = sno_bind("SAFE");
+    sub = bind("SAFE");
     orig = sub.begin;
-    assert(!sno_var(&sub, NULL, sizeof(buf)) && sub.begin == orig);
+    assert(!var(&sub, NULL, sizeof(buf)) && sub.begin == orig);
 
-    assert(!sno_var(NULL, buf, sizeof(buf)));
+    assert(!var(NULL, buf, sizeof(buf)));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_var(&sub, buf, sizeof(buf)) && !sub.begin && !sub.end);
+    sub = view(NULL, NULL);
+    assert(!var(&sub, buf, sizeof(buf)) && !sub.begin && !sub.end);
 
     char composite[] = "PREFIXHELLOSUFFIX";
-    sub = sno_view(&composite[6], &composite[11]);
-    assert(sno_var(&sub, buf, sizeof(buf)) && strcmp(buf, "HELLO") == 0 && sub.begin == sub.end);
+    sub = view(&composite[6], &composite[11]);
+    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "HELLO") == 0 && sub.begin == sub.end);
 
     char cmd[] = "15L";
-    sub = sno_bind(cmd);
-    sno_span(&sub, sno_bind("0123456789"));
-    sno_view_t num_view = sno_view(cmd, sub.begin);
-    assert(sno_var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
-    assert(sno_lit(&sub, sno_bind("L")));
+    sub = bind(cmd);
+    span(&sub, bind("0123456789"));
+    view_t num_view = view(cmd, sub.begin);
+    assert(var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
+    assert(lit(&sub, bind("L")));
 }
 
-void test_int(void) {
-    sno_view_t sub;
+void test_num(void) {
+    view_t sub;
     int n;
 
     // Valid positives (within edlin's actual usage range)
-    sub = sno_bind("123");
-    assert(sno_int(&sub, &n) && n == 123 && sub.begin == sub.end);
+    sub = bind("123");
+    assert(num(&sub, &n) && n == 123 && sub.begin == sub.end);
 
-    sub = sno_bind("+456");
-    assert(sno_int(&sub, &n) && n == 456 && sub.begin == sub.end);
+    sub = bind("+456");
+    assert(num(&sub, &n) && n == 456 && sub.begin == sub.end);
 
-    sub = sno_bind("0");
-    assert(sno_int(&sub, &n) && n == 0 && sub.begin == sub.end);
+    sub = bind("0");
+    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
 
     // Portable max/min guaranteed by C standard (all vintage systems support these)
-    sub = sno_bind("32767");   // Max portable positive (C standard min range)
-    assert(sno_int(&sub, &n) && n == 32767 && sub.begin == sub.end);
+    sub = bind("32767");   // Max portable positive (C standard min range)
+    assert(num(&sub, &n) && n == 32767 && sub.begin == sub.end);
 
-    sub = sno_bind("-32767");  // Min portable negative (C standard min range)
-    assert(sno_int(&sub, &n) && n == -32767 && sub.begin == sub.end);
+    sub = bind("-32767");  // Min portable negative (C standard min range)
+    assert(num(&sub, &n) && n == -32767 && sub.begin == sub.end);
 
     // Realistic edlin line numbers (safe for 16-bit and 32-bit)
-    sub = sno_bind("9999");
-    assert(sno_int(&sub, &n) && n == 9999 && sub.begin == sub.end);
+    sub = bind("9999");
+    assert(num(&sub, &n) && n == 9999 && sub.begin == sub.end);
 
     // Stop at NOTANY boundary
-    sub = sno_bind("123x");
-    assert(sno_int(&sub, &n) && n == 123 && *sub.begin == 'x');
+    sub = bind("123x");
+    assert(num(&sub, &n) && n == 123 && *sub.begin == 'x');
 
-    sub = sno_bind("-456y");
-    assert(sno_int(&sub, &n) && n == -456 && *sub.begin == 'y');
+    sub = bind("-456y");
+    assert(num(&sub, &n) && n == -456 && *sub.begin == 'y');
 
     // Fail on invalid first char
-    sub = sno_bind("x123");
-    assert(!sno_int(&sub, &n));
+    sub = bind("x123");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind(" 123");
-    assert(!sno_int(&sub, &n));
+    sub = bind(" 123");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("");
-    assert(!sno_int(&sub, &n));
+    sub = bind("");
+    assert(!num(&sub, &n));
 
     // Reject malformed signs
-    sub = sno_bind("+");
-    assert(!sno_int(&sub, &n));
+    sub = bind("+");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("-");
-    assert(!sno_int(&sub, &n));
+    sub = bind("-");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("++1");
-    assert(!sno_int(&sub, &n));
+    sub = bind("++1");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("--1");
-    assert(!sno_int(&sub, &n));
+    sub = bind("--1");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("+-1");
-    assert(!sno_int(&sub, &n));
+    sub = bind("+-1");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("-+1");
-    assert(!sno_int(&sub, &n));
+    sub = bind("-+1");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("-x");
-    assert(!sno_int(&sub, &n));
+    sub = bind("-x");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("+y");
-    assert(!sno_int(&sub, &n));
+    sub = bind("+y");
+    assert(!num(&sub, &n));
 
-    sub = sno_bind("-0");
-    assert(sno_int(&sub, &n) && n == 0 && sub.begin == sub.end);
+    sub = bind("-0");
+    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
 
     // Atomic rollback on failure
     char buf[] = "x123";
-    sub = sno_bind(buf);
-    sno_cursor_t orig = sub.begin;
-    assert(!sno_int(&sub, &n) && sub.begin == orig);
+    sub = bind(buf);
+    cursor_t orig = sub.begin;
+    assert(!num(&sub, &n) && sub.begin == orig);
 
     // NULL safety
-    assert(!sno_int(NULL, &n));
+    assert(!num(NULL, &n));
 
-    sub = sno_view(NULL, NULL);
-    assert(!sno_int(&sub, &n));
+    sub = view(NULL, NULL);
+    assert(!num(&sub, &n));
 
     char buf1[] = "123";
-    sub = sno_view(buf1, NULL);
+    sub = view(buf1, NULL);
     orig = sub.begin;
-    assert(!sno_int(&sub, &n) && sub.begin == orig && sub.end == NULL);
+    assert(!num(&sub, &n) && sub.begin == orig && sub.end == NULL);
 
     char buf2[] = "123";
-    sub = sno_view(NULL, buf2);
-    assert(!sno_int(&sub, &n) && !sub.begin && sub.end == buf2);
+    sub = view(NULL, buf2);
+    assert(!num(&sub, &n) && !sub.begin && sub.end == buf2);
 }
 
-void sno_test(void) {
+void test(void) {
     test_bind();
     test_view();
     test_size();
@@ -584,10 +584,10 @@ void sno_test(void) {
     test_any();
     test_notany();
     test_span();
-    test_break();
+    test_brk();
     test_skip();
     test_var();
-    test_int();
+    test_num();
     printf("All SNOBOL-C primitive tests pass!\n");
 }
 
