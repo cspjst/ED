@@ -127,9 +127,10 @@ dos_error_code_t dos_get_free_memory_paragraphs(uint16_t* free) {
         pop     ds
         popf
     }
-    // Treat "insufficient memory" as success for this query hack
+    // "insufficient memory" is success
     if (err_code == DOS_INSUFFICIENT_MEMORY) {
         return DOS_SUCCESS;
     }
+    // anything else is not
     return err_code;
 }
