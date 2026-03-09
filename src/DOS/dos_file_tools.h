@@ -1,9 +1,14 @@
 #ifndef DOS_FILE_TOOLS_H
 #define DOS_FILE_TOOLS_H
 
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
+#endif
+
 #include "dos_file_types.h"
 #include "dos_error_types.h"
-#include "../STD/dos_stdint.h"
 
 uint8_t dos_file_exists(const char* path_name);
 

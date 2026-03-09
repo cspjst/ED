@@ -5,11 +5,15 @@
 #ifndef DOS_SERVICES_H
 #define DOS_SERVICES_H
 
-#ifndef __LARGE__
-    //#error "This module requires large memory model (ie far data pointers)"
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stdint.h"
+#else
+    #include <stdint.h>
 #endif
 
-#include "../STD/dos_stdint.h"
+#ifndef __LARGE__
+    #error "This module requires large memory model (ie far data pointers)"
+#endif
 
 // 0  Program terminate
 // 1  Keyboard input with echo

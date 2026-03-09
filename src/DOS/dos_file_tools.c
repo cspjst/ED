@@ -1,8 +1,13 @@
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stddef.h"
+#else
+    #include <stddef.h>
+#endif
+
 #include "dos_file_tools.h"
 #include "dos_error_types.h"
 #include "dos_file_services.h"
 #include "dos_file_types.h"
-#include "../STD/dos_stddef.h"
 
 uint8_t dos_file_exists(const char* path_name) {
     dos_file_attributes_t attr;

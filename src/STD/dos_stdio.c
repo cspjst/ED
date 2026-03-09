@@ -283,6 +283,15 @@ int fprintf(FILE* stream, const char* format, ...) {
     return count;
 }
 
+int printf_(const char* format, ...) {
+    // This symbol satisfies linker, but code should use macro
+    va_list args;
+    va_start(args, format);
+    int result = fprintf(stdout, format, args);  // Your actual logic
+    va_end(args);
+    return result;
+}
+
 // Input functions
 
 int fgetc(FILE* stream) {

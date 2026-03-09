@@ -1,14 +1,24 @@
 #ifndef TEST_DOS_FILES_H
 #define TEST_DOS_FILES_H
 
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_stdint.h"
+    #include "../STD/dos_string.h"
+    #include "../STD/dos_assert.h"
+#else
+    #include <stdint.h>
+    #include <stdio.h>
+    #include <string.h>
+    #include <assert.h>
+#endif
+
 #include "dos_file_tools.h"
 #include "dos_file_services.h"
 #include "dos_error_types.h"
 #include "dos_file_services.h"
-#include "../STD/dos_stdint.h"
-#include "../STD/dos_stdio.h"
-#include "../STD/dos_string.h"
-#include "../STD/dos_assert.h"
+
+
 
 void test_dos_files() {
     printf("Testing DOS File Functions...\n");
@@ -184,6 +194,7 @@ void test_dos_files() {
     dos_close_file(fh);
     dos_delete_file("EMPTY.TXT");
 
+#ifdef NOT_DOSBOX
     // Test 13: File attribute manipulation
     printf("13. Testing file attribute manipulation...\n");
     err = dos_create_file("ATTRTEST.TXT", CREATE_READ_WRITE, &fh);
@@ -196,21 +207,21 @@ void test_dos_files() {
     assert(err == 0);
     printf("Read-only attribute set\n");
 
+
     // Verify attribute
     err = dos_get_file_attributes("ATTRTEST.TXT", &attrs);
     assert(err == 0);
     assert((attrs & ATTR_READ_ONLY) == 1); // Read-only bit set
     printf("Read-only attribute verified: 0x%02X\n", attrs);
 
-    // Try to open read-only file for writing (should fail)
-    // not work on DOSBOX
-    //err = dos_open_file("ATTRTEST.TXT", ACCESS_WRITE_ONLY, &fh);
-    //assert(err != 0);
-    //printf("Read-only file write protection working (error: %d)\n", err);
+    err = dos_open_file("ATTRTEST.TXT", ACCESS_WRITE_ONLY, &fh);
+    assert(err != 0);
+    printf("Read-only file write protection working (error: %d)\n", err);
 
     // Clear attributes and delete
     dos_set_file_attributes("ATTRTEST.TXT", 0);
     dos_delete_file("ATTRTEST.TXT");
+#endif
 
     // Test 14: Large file operations
     printf("14. Testing large file operations...\n");

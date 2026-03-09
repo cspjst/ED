@@ -6,7 +6,7 @@ cmake_minimum_required(VERSION 3.10)
 set(CMAKE_C_COMPILER_WORKS 1)
 
 project(
-    ED
+    TEST
     VERSION 0.1.0
     LANGUAGES C
 )
@@ -25,7 +25,7 @@ add_compile_options(
     # === REQUIRED (always on) ===
     -0                  # 8086/8088 instructions ONLY
     -bt=dos             # Target DOS
-    -l=dos              # Link DOS library
+    #-l=dos              # Link DOS library
 
     # === MEMORY MODEL (pick ONE) ===
     -ml                 # Large model: far data pointers (flexible)
@@ -33,6 +33,9 @@ add_compile_options(
 
     # === SIZE vs SPEED (pick ONE) ===
     -os                 # Optimize for CODE SIZE
+    -ox                 # Enable extra optimizations (dead code elimination)
+    -zp1                # Pack structs to 1-byte alignment (Critical for data size)
+    -fpi87              # Assume 8087 exists (removes software FP emulation stubs if any are pulled in)
     # -ot               # Optimize for SPEED
     # -od               # Disable optimizations (debugging)
 
@@ -43,7 +46,7 @@ add_compile_options(
 
     # === STACK SAFETY ===
     -e0                 # No stack checking (saves ~20 bytes)
-    # -e1               # Minimal stack overflow check
+    #-e1               # Minimal stack overflow check
 
     # === LANGUAGE COMPAT ===
     -za99               # Partial C99 (va_arg, etc.)
@@ -55,13 +58,15 @@ add_compile_options(
     # -w2               # More warnings
 
     # === BUILD OUTPUT ===
-    -zq                 # Quiet mode (cleaner output)
+    #-zq                 # Quiet mode (cleaner output)
     # (omit for verbose build log)
 )
 add_definitions(
     -D__DOS__
     -D__8086__  # Explicit 8086 target
-  )
+    -DPOLICY_USE_DOS_STD
+)
+
 endif()
 
 # WARNING: Using GLOB for convenience. If adding new files, rerun: ./cmk.sh
@@ -70,15 +75,10 @@ file(GLOB SOURCES
     *.c
     BIOS/*.c
     DOS/*.c
-    ED/*.c
-    SNO/*.c
     STD/*.c
+    TEST/*.c
 )
 
 # message(Source list="${SOURCES}")
 
-add_executable(ED ${SOURCES})
-
-# Optional: Install target
-# rename me...
-#install(TARGETS snoc DESTINATION bin)
+add_executable(TEST ${SOURCES})

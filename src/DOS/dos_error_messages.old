@@ -1,14 +1,5 @@
-/*
-* @brief  DOS Error Codes, Error Code Classes, Error Code Action Codes and Locus
- *
- * Of the following error codes, only error codes 1-12 are returned in AX upon exit from interrupt 21 or 24.
- * The rest are obtained by issuing the "get extended error" function call.
- * @see INT 21,59
-*/
-#ifndef DOS_ERROR_MESSAGES_H
-#define DOS_ERROR_MESSAGES_H
+#include "dos_error_messages.h"
 
-#define MAX_ERR_STRING_LEN  64
 
 /**
 * @brief translate DOS error code to standard message.
@@ -300,4 +291,8 @@ static const char dos_error_locus[6][MAX_ERR_STRING_LEN] = {
         "05  memory related "
 };
 
-#endif
+const char* dos_get_error_message(unsigned char code) {
+    if (code >= 85) return "Unknown";
+    return dos_error_messages[code];
+}
+*/

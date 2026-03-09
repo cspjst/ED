@@ -1,9 +1,15 @@
 #ifndef TEST_MEMORY_H
 #define TEST_MEMORY_H
 
+#ifdef POLICY_USE_DOS_STD
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_assert.h"
+#else
+    #include <stdio.h>
+    #include <assert.h>
+#endif
+
 #include "dos_memory_services.h"
-#include "../STD/dos_stdio.h"
-#include "../STD/dos_assert.h"
 
 void test_allocate_memory(void) {
 
@@ -123,6 +129,9 @@ void test_get_free_memory(void) {
 }
 
 void test_dos_memory(void) {
+
+    printf("Testing DOS memory functions...\n");
+
     test_allocate_memory();
     test_free_memory();
     test_get_free_memory();
