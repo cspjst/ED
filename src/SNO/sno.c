@@ -1,5 +1,15 @@
 #include "sno.h"
 
+// Internal helper function - check if a single character is in the given charset
+// SUCCESS: returns true (character found in charset)
+// FAILURE: returns false (character not in charset or empty set)
+static bool char_in_set(char c, view_t charset) {
+    cursor_t p = charset.begin;
+    while (p < charset.end && *p != c) p++;
+    return p != charset.end;
+}
+
+// Construction and sizing
 view_t bind(const char* cstr) {
     view_t v;
     v.begin = v.end = cstr;
@@ -14,11 +24,12 @@ view_t view(cursor_t begin, cursor_t end) {
     return v;
 }
 
-int size(view_t view) {
+unsigned int size(view_t view) {
     return (view.begin && view.end && view.begin < view.end) ? (int)(view.end - view.begin) : 0;
 }
 
-bool lit(view_t* subject, view_t pattern) {
+// 2.3
+bool str(view_t* subject, view_t pattern) {
     if (!subject || !subject->begin || !pattern.begin) return false;
     if (size(pattern) == 0) return true;    // empty pattern always matches
 
@@ -35,15 +46,44 @@ bool lit(view_t* subject, view_t pattern) {
     return true;
 }
 
-// Internal helper function - check if a single character is in the given charset
-// SUCCESS: returns true (character found in charset)
-// FAILURE: returns false (character not in charset or empty set)
-// RETURNS: true if char in set, false otherwise
-static bool char_in_set(char c, view_t charset) {
-    cursor_t p = charset.begin;
-    while (p < charset.end && *p != c) p++;
-    return p != charset.end;
+
+
+// 2.5
+bool var(view_t* subject, char* buf, size_t buflen) {
+    if (!subject || !subject->begin || !subject->end || !buf || buflen == 0) return false;
+    int len = size(*subject);
+    if (len < 0 || (size_t)len >= buflen) return false;  // need space for null terminator
+
+    cursor_t p = subject->begin;
+    while (p < subject->end) *buf++ = *p++;
+    *buf = '\0';
+    subject->begin = subject->end;  // consume entire view
+    return true;
 }
+
+bool num(view_t* subject, int* n) {
+    if (!subject || !subject->begin || !subject->end || !n) return false;
+    if (subject->begin >= subject->end) return false;  // reject empty subject
+    if (!char_in_set(*subject->begin, bind("+-0123456789"))) return false;
+
+    view_t temp = *subject;
+    any(&temp, bind("+-"));  // optional sign (atomic)
+
+    cursor_t p = temp.begin;
+    if (!span(&temp, bind("0123456789"))) return false;  // require digits
+
+    int num = 0;
+    while (p < temp.begin) {
+        num = num * 10 + (*p - '0');
+        p++;
+    }
+    if (*subject->begin == '-') num = -num;
+
+    *n = num;
+    *subject = temp;
+    return true;
+}
+
 
 bool any(view_t* subject, view_t charset) {
     if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
@@ -94,39 +134,4 @@ bool skip(view_t* subject, view_t charset) {
     while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
         subject->begin++;
     return true;  // always succeeds for valid inputs
-}
-
-bool var(view_t* subject, char* buf, size_t buflen) {
-    if (!subject || !subject->begin || !subject->end || !buf || buflen == 0) return false;
-    int len = size(*subject);
-    if (len < 0 || (size_t)len >= buflen) return false;  // need space for null terminator
-
-    cursor_t p = subject->begin;
-    while (p < subject->end) *buf++ = *p++;
-    *buf = '\0';
-    subject->begin = subject->end;  // consume entire view
-    return true;
-}
-
-bool num(view_t* subject, int* n) {
-    if (!subject || !subject->begin || !subject->end || !n) return false;
-    if (subject->begin >= subject->end) return false;  // reject empty subject
-    if (!char_in_set(*subject->begin, bind("+-0123456789"))) return false;
-
-    view_t temp = *subject;
-    any(&temp, bind("+-"));  // optional sign (atomic)
-
-    cursor_t p = temp.begin;
-    if (!span(&temp, bind("0123456789"))) return false;  // require digits
-
-    int num = 0;
-    while (p < temp.begin) {
-        num = num * 10 + (*p - '0');
-        p++;
-    }
-    if (*subject->begin == '-') num = -num;
-
-    *n = num;
-    *subject = temp;
-    return true;
 }

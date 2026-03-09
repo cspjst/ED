@@ -54,41 +54,41 @@ void test_size(void) {
     assert(size(bind(NULL)) == 0);
 }
 
-void test_lit(void) {
+void test_str(void) {
     char input[] = "HELLO";
     view_t sub = bind(input);
-    assert(lit(&sub, bind("HEL")) && sub.begin == input + 3 && *sub.begin == 'L');
+    assert(str(&sub, bind("HEL")) && sub.begin == input + 3 && *sub.begin == 'L');
 
     sub = bind("TEST");
     cursor_t orig = sub.begin;
-    assert(!lit(&sub, bind("FAIL")) && sub.begin == orig);
+    assert(!str(&sub, bind("FAIL")) && sub.begin == orig);
 
     sub = bind("ANY");
     orig = sub.begin;
-    assert(lit(&sub, bind("")) && sub.begin == orig);
+    assert(str(&sub, bind("")) && sub.begin == orig);
 
     sub = bind("HI");
     orig = sub.begin;
-    assert(!lit(&sub, bind("HELLO")) && sub.begin == orig);
+    assert(!str(&sub, bind("HELLO")) && sub.begin == orig);
 
     sub = view(NULL, NULL);
-    assert(!lit(&sub, bind("X")) && !sub.begin && !sub.end);
+    assert(!str(&sub, bind("X")) && !sub.begin && !sub.end);
 
     sub = bind("SAFE");
     orig = sub.begin;
-    assert(!lit(&sub, view(NULL, NULL)) && sub.begin == orig);
+    assert(!str(&sub, view(NULL, NULL)) && sub.begin == orig);
 
     sub = view(&input[3], &input[1]);
     orig = sub.begin;
-    assert(!lit(&sub, bind("X")) && sub.begin == orig);
+    assert(!str(&sub, bind("X")) && sub.begin == orig);
 
     sub = bind("");
     orig = sub.begin;
-    assert(!lit(&sub, bind("X")) && sub.begin == orig);
+    assert(!str(&sub, bind("X")) && sub.begin == orig);
 
     sub = bind("Hello");
     orig = sub.begin;
-    assert(!lit(&sub, bind("HELLO")) && sub.begin == orig);
+    assert(!str(&sub, bind("HELLO")) && sub.begin == orig);
 }
 
 void test_any(void) {
@@ -274,7 +274,7 @@ void test_span(void) {
 
     char buf10[] = "123,456,789";
     sub = bind(buf10);
-    assert(span(&sub, bind("0123456789")) && lit(&sub, bind(",")) && span(&sub, bind("0123456789")) && *sub.begin == ',');
+    assert(span(&sub, bind("0123456789")) && str(&sub, bind(",")) && span(&sub, bind("0123456789")) && *sub.begin == ',');
 
     assert(!span(NULL, bind("A")));
 
@@ -405,12 +405,12 @@ void test_skip(void) {
     char buf6[] = "15L";
     sub = bind(buf6);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && lit(&sub, bind("L")));
+    assert(span(&sub, bind("0123456789")) && str(&sub, bind("L")));
 
     char buf7[] = "  15L";
     sub = bind(buf7);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && lit(&sub, bind("L")));
+    assert(span(&sub, bind("0123456789")) && str(&sub, bind("L")));
 
     char buf8[] = "aaaabbb";
     sub = bind(buf8);
@@ -481,7 +481,7 @@ void test_var(void) {
     span(&sub, bind("0123456789"));
     view_t num_view = view(cmd, sub.begin);
     assert(var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
-    assert(lit(&sub, bind("L")));
+    assert(str(&sub, bind("L")));
 }
 
 void test_num(void) {
@@ -580,7 +580,7 @@ void test(void) {
     test_bind();
     test_view();
     test_size();
-    test_lit();
+    test_str();
     test_any();
     test_notany();
     test_span();
