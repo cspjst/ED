@@ -13,7 +13,8 @@
 //#include "TEST/test_files.h"
 //#include "TEST/test_stdlib.h"
 //#include "TEST/dos_stdio.h"
-#include "TEST/test_sno_core.h"
+//#include "TEST/test_sno_core.h"
+#include "TEST/test_sno_extra.h"
 
 int main() {
 
@@ -24,7 +25,8 @@ int main() {
 #endif
 
     //SNO
-    test_sno_core();
+    //test_sno_core();
+    test_sno_extra();
 
     // BIOS
     //test_bios_memory();

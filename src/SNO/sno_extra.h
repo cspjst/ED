@@ -54,7 +54,36 @@ bool rem(view_t* s);
  */
 bool bal(view_t* s, char open, char close);
 
+/**
+ * @brief Repeat string n times (SNOBOL DUPL)
+ * @param dst Output buffer (must have space for strlen(src)*n + 1)
+ * @param src Source string (null-terminated)
+ * @param n Number of repetitions (0 produces empty string)
+ * @return dst on success, NULL on NULL args
+ * @note Caller is responsible for ensuring dst has sufficient space
+ */
+char* strdupl(char* dst, const char* src, unsigned int n);
 
+/**
+ * @brief Trim leading and trailing whitespace (SNOBOL TRIM)
+ * @param dst Output buffer (must have space for strlen(src) + 1)
+ * @param src Source string (null-terminated)
+ * @return dst on success, NULL on NULL args
+ * @note Trims spaces (' ') and tabs ('\t') from both ends
+ * @note In-place safe: dst may equal src
+ */
+char* strtrim(char* dst, const char* src);
 
+/**
+ * @brief Character substitution (SNOBOL REPLACE)
+ * @param dst Output buffer (must have space for strlen(src) + 1)
+ * @param src Source string (null-terminated)
+ * @param from Characters to replace (null-terminated)
+ * @param to Replacement characters (null-terminated, must equal strlen(from))
+ * @return dst on success, NULL on NULL args or length mismatch
+ * @note Rightmost mapping wins for duplicate chars in from
+ * @note In-place safe: dst may equal src (single-char replacement doesn't change length)
+ */
+char* strreplace(char* dst, const char* src, const char* from, const char* to);
 
 #endif
