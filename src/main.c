@@ -1,12 +1,10 @@
 #ifdef POLICY_USE_DOS_STD
     #include "STD/dos_stdio.h"
-    #include "STD/dos_assert.h"
 #else
     #include <stdio.h>
-    #include <assert.h>
 #endif
 
-#include "TEST/test_bios.h"
+//#include "TEST/test_bios.h"
 //#include "TEST/test_dos_memory.h"
 //#include "TEST/test_dos_services.h"
 //#include "TEST/test_dos_files.h"
@@ -15,6 +13,7 @@
 //#include "TEST/test_files.h"
 //#include "TEST/test_stdlib.h"
 //#include "TEST/dos_stdio.h"
+#include "TEST/test_sno.h"
 
 int main() {
 
@@ -23,9 +22,13 @@ int main() {
 #else
     printf("Test Harness\n");
 #endif
+
+    //SNO
+    test_sno();
+
     // BIOS
-    test_bios_memory();
-    test_bios_keys();
+    //test_bios_memory();
+    //test_bios_keys();
 
     // DOS
     //test_dos_memory();

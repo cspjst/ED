@@ -1,5 +1,5 @@
-#ifndef SNO_TEST_H
-#define SNO_TEST_H
+#ifndef TEST_SNO_H
+#define TEST_SNO_H
 
 #include "../SNO/sno.h"
 #include <assert.h>
@@ -576,7 +576,7 @@ void test_num(void) {
     assert(!num(&sub, &n) && !sub.begin && sub.end == buf2);
 }
 
-void test(void) {
+void test_sno(void) {
     test_bind();
     test_view();
     test_size();

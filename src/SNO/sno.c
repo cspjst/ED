@@ -46,8 +46,16 @@ bool str(view_t* subject, view_t pattern) {
     return true;
 }
 
+bool chr(view_t* subject, char c) {
+    if (!subject || !subject->begin) return false;
 
+    cursor_t s = subject->begin;
+    while (s < subject->end && *s != c) s++;
 
+    if(s == subject->end) return false; // no match = failure
+    subject->begin = s;                 // advance cursor past the matched pattern
+    return true;
+}
 // 2.5
 bool var(view_t* subject, char* buf, size_t buflen) {
     if (!subject || !subject->begin || !subject->end || !buf || buflen == 0) return false;
