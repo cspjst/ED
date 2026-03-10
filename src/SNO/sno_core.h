@@ -1,7 +1,14 @@
 /**
+ * @file sno_core.h
+ * @brief SNOBOL4 Pattern Matching Library for C - Core Functions
+ *
  * C function implementation of the SNOBOL4 pattern matching semantics
- * As defined in 'The SNOBOL4 Programming Language' 2nd edition Griswold, Poage & Polonksy 1971
- * aka the Green Book
+ * as defined in 'The SNOBOL4 Programming Language' 2nd edition,
+ * Griswold, Poage & Polonsky, 1971 (aka "The Green Book").
+ *
+ * @author Jeremy Simon Thornton
+ * @copyright Copyright (c) 2026 Jeremy Simon Thornton
+ * @license MIT License — see LICENSE file or https://opensource.org/licenses/MIT
  *
  * @note Design Decisions:
  *  + Immutable Subject - null treminated C string.
@@ -15,35 +22,22 @@
  *  + Cursor remains UNCHANGED on FAILURE (atomic rollback)
  *  + Return true/false enables natural &&/|| chaining
  *  + Only NULL arguments cause true errors (not "no match")
+ *
+ * @version 0.9.1
+ * @date 2026
  */
 #ifndef SNO_CORE_H
 #define SNO_CORE_H
 
-#include <stddef.h>
-#include <string.h>
-#include <stdbool.h>
+#ifdef POLICY_USE_DOS_STD
+    #include "dos_stddef.h"
+    #include "dos_stdbool.h"
+#else
+    #include <stddef.h>
+    #include <stdbool.h>
+#endif
 
-// Predefined charset strings for convenience
-#define SNO_DIGITS  "0123456789"
-#define SNO_UPPER   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
-#define SNO_LOWER   "abcdefghijklmnopqrstuvwxyz"
-#define SNO_LETTERS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
-#define SNO_ALNUM   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
-#define SNO_BLANK   " \t"
-
-/**
- * 2.4.2 Anchored Mode
- * The cursor acts in SNOBOL 'anchored' mode
- */
-typedef const char* cursor_t;
-
-/**
- * The string view is [cursor, eof)
- */
-typedef struct {
-    cursor_t begin;  // Current parsing position (cursor)
-    cursor_t end;    // End of valid input (exclusive bound)
-} view_t;
+#include "sno_types.h"
 
 /**
  * Bind null-terminated C string to parsing context

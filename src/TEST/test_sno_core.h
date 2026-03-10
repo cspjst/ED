@@ -1,3 +1,10 @@
+/**
+ * @file test_sno.h
+ * @brief Test harness for SNOBOL4-C core pattern matching primitives
+ *
+ * @copyright Copyright (c) 2026 Jeremy Simon Thornton
+ * @license MIT License — see LICENSE file
+ */
 #ifndef TEST_SNO_H
 #define TEST_SNO_H
 
@@ -333,6 +340,116 @@ void test_num(void) {
     char buf2[] = "123";
     sub = view(NULL, buf2);
     assert(!num(&sub, &n) && !sub.begin && sub.end == buf2);
+}
+
+void test_nul(void) {
+    view_t sub;
+    cursor_t orig;
+
+    // Basic: succeeds without advancing cursor
+    char buf1[] = "TEST";
+    sub = bind(buf1);
+    orig = sub.begin;
+    assert(nul(&sub) && sub.begin == orig && *sub.begin == 'T');
+
+    // Works at end of string (cursor at EOF)
+    sub = bind(buf1);
+    sub.begin = sub.end;  // Advance to end
+    orig = sub.begin;
+    assert(nul(&sub) && sub.begin == orig);
+
+    // Works on empty string
+    char buf2[] = "";
+    sub = bind(buf2);
+    orig = sub.begin;
+    assert(nul(&sub) && sub.begin == orig);
+
+    // NULL safety: NULL subject fails
+    assert(!nul(NULL));
+
+    // NULL safety: NULL begin fails
+    sub = view(NULL, buf1);
+    assert(!nul(&sub));
+
+    // NULL safety: NULL end fails (consistent with all primitives)
+    sub = view(buf1, NULL);
+    assert(!nul(&sub));
+
+    // NULL safety: both NULL fails
+    sub = view(NULL, NULL);
+    assert(!nul(&sub));
+
+    // Inverted view (begin > end): succeeds (valid view state, 0 chars to match)
+    char buf3[] = "X";
+    sub = view(&buf3[1], &buf3[0]);
+    orig = sub.begin;
+    assert(nul(&sub) && sub.begin == orig);
+
+    // Chaining: nul() doesn't interfere with subsequent matches
+    char buf4[] = "ABC";
+    sub = bind(buf4);
+    assert(nul(&sub) && chr(&sub, 'A') && nul(&sub) && chr(&sub, 'B') && chr(&sub, 'C'));
+
+    // Multiple nul() calls are idempotent
+    sub = bind(buf4);
+    orig = sub.begin;
+    assert(nul(&sub) && nul(&sub) && nul(&sub) && sub.begin == orig);
+
+    // Composition: nul() in alternation for optional match (SNOBOL: 'X' | NULL)
+    char buf5[] = "Y";
+    sub = bind(buf5);
+    orig = sub.begin;
+    // Try 'X', if fails, nul() succeeds without consuming
+    assert((chr(&sub, 'X') || nul(&sub)) && sub.begin == orig);  // 'X' failed, nul() succeeded
+    assert(chr(&sub, 'Y'));  // Still at 'Y', can match it
+
+    // Composition: nul() for optional prefix
+    char buf6[] = "VALUE";
+    sub = bind(buf6);
+    // Optional sign: ('+' | '-' | NULL)
+    assert((chr(&sub, '+') || chr(&sub, '-') || nul(&sub)) && *sub.begin == 'V');
+
+    // Composition: nul() for optional suffix
+    char buf7[] = "123";
+    sub = bind(buf7);
+    assert(span(&sub, "0123456789") && (chr(&sub, 'L') || nul(&sub)));  // No 'L', nul() succeeds
+
+    // Composition: nul() as termination guard
+    char buf8[] = "123  ";
+    sub = bind(buf8);
+    assert(span(&sub, "0123456789") && skip(&sub, " \t") && nul(&sub) && sub.begin == sub.end);
+
+    // Composition: nul() in skip() macro (span || nul)
+    char buf9[] = "   TEXT";
+    sub = bind(buf9);
+    orig = sub.begin;
+    assert(skip(&sub, " \t") && sub.begin == orig + 3 && *sub.begin == 'T');  // span() matched
+
+    char buf10[] = "TEXT";
+    sub = bind(buf10);
+    orig = sub.begin;
+    assert(skip(&sub, " \t") && sub.begin == orig && *sub.begin == 'T');  // span() failed, nul() succeeded
+
+    // Real-world: optional delimiter
+    char buf11[] = "KEYVALUE";
+    sub = bind(buf11);
+    assert(brk(&sub, "=") && (chr(&sub, '=') || nul(&sub)));  // No '=', nul() allows continuation
+
+    // Real-world: parse optional sign + number
+    char buf12[] = "456";
+    sub = bind(buf12);
+    assert((chr(&sub, '+') || chr(&sub, '-') || nul(&sub)) && span(&sub, "0123456789"));
+
+    char buf13[] = "-789";
+    sub = bind(buf13);
+    assert((chr(&sub, '+') || chr(&sub, '-') || nul(&sub)) && span(&sub, "0123456789"));
+
+    // Verify nul() doesn't consume anything in composition
+    char buf14[] = "ABC";
+    sub = bind(buf14);
+    cursor_t before = sub.begin;
+    assert(nul(&sub) && nul(&sub) && nul(&sub));
+    assert(sub.begin == before);  // Cursor never moved
 }
 
 void test_at(void) {
@@ -943,6 +1060,7 @@ void test_sno_core(void) {
     test_var();
     test_num();
     // 2.6
+    test_nul();
     // 2.7
     test_at();
     // 2.8
@@ -956,7 +1074,7 @@ void test_sno_core(void) {
     // composition
     test_skip();
 
-    printf("All SNOBOL-C primitive tests pass!\n");
+    printf("All core SNOBOL-C primitive tests pass!\n");
 }
 
 #endif

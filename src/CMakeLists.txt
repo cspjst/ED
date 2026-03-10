@@ -1,3 +1,4 @@
+# Copyright (c) 2026 Jeremy Simon Thornton, License: MIT
 cmake_minimum_required(VERSION 3.10)
 
 # Warning: This skips critical compiler checks.

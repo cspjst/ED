@@ -1,3 +1,11 @@
+/**
+ * @file sno_core.c
+ * @brief SNOBOL4 Pattern Matching Library — Implementation
+ *
+ * @author Jeremy Simon Thornton
+ * @copyright Copyright (c) 2026 Jeremy Simon Thornton
+ * @license MIT License — see LICENSE file for full terms
+ */
 #include "sno_core.h"
 
 // Helper functions
