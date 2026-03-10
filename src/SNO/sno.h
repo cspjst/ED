@@ -23,6 +23,14 @@
 #include <string.h>
 #include <stdbool.h>
 
+// Predefined charset strings for convenience
+#define SNO_DIGITS  "0123456789"
+#define SNO_UPPER   "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+#define SNO_LOWER   "abcdefghijklmnopqrstuvwxyz"
+#define SNO_LETTERS "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz"
+#define SNO_ALNUM   "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789"
+#define SNO_BLANK   " \t"
+
 /**
  * 2.4.2 Anchored Mode
  * The cursor acts in SNOBOL 'anchored' mode
@@ -106,6 +114,7 @@ bool chr(view_t* subject, char c);
 bool var(view_t* subject, char* buf, size_t buflen);
 
 /**
+ * 2.5 Value Assignment through Pattern Matching
  * Parse signed integer from current cursor position
  * Format: [sign] digits (sign optional, digits required)
  * SUCCESS: cursor advanced past entire integer, *out = parsed value
@@ -157,41 +166,59 @@ unsigned int at(view_t* subject, cursor_t p);
  */
 bool len(view_t* subject, unsigned int length);
 
-
-
-
-
 /**
- * 2.9 SNOBOL SPAN and BREAK
- * Match 1+ consecutive characters from charset (greedy)
+ * 2.9 SNOBOL SPAN(charset)
+ * @brief match 1+ consecutive characters from charset (greedy, anchored)
  * SUCCESS: cursor advanced past longest prefix of charset chars (≥1 matched)
- * FAILURE: cursor unchanged             (first char not in charset or EOF)
- * @return: true if ≥1 char matched, false otherwise
+ * FAILURE: cursor unchanged (first char not in charset, empty subject, or empty charset)
+ * @param subject  parsing context (mutated on success)
+ * @param charset  null-terminated C string defining allowed characters
+ * @return true if ≥1 char matched, false otherwise
+ * @note Anchored: attempts match ONLY at current cursor position
+ * @note Greedy: consumes all consecutive charset chars from current position
  */
-bool span(view_t* subject, view_t charset);
+bool span(view_t* subject, const char* charset);
 
 /**
- * Skip 0+ characters NOT in charset (SNOBOL: BREAK('set'))
- * ALWAYS succeeds for valid inputs — stops BEFORE first char in charset (or at end)
- * RETURNS: true for all valid inputs, false ONLY for NULL arguments
+ * 2.9 SNOBOL BREAK(charset)
+ * @brief skip 0+ characters NOT in charset (greedy, anchored)
+ * SUCCESS: cursor advanced to first char in charset (or end of subject)
+ * FAILURE: never fails for valid inputs (returns false only for NULL args)
+ * @param subject  parsing context (mutated on success)
+ * @param charset  null-terminated C string defining stopping characters
+ * @return true for valid inputs, false for NULL arguments
+ * @note Anchored: starts at current cursor, no implicit scanning
+ * @note Zero-match allowed: succeeds even if first char IS in charset
+ * @note Complement of span(): brk() matches chars NOT in charset
  */
-bool brk(view_t* subject, view_t charset);
+bool brk(view_t* subject, const char* charset);
 
+/**
+ * 2.9 SNOBOL ANY(charset)
+ * @brief match exactly ONE character from charset (anchored)
+ * SUCCESS: cursor advanced by 1 (char matched)
+ * FAILURE: cursor unchanged (char not in charset, empty subject, or empty charset)
+ * @param subject  parsing context (mutated on success)
+ * @param charset  null-terminated C string defining allowed characters
+ * @return true if matched, false otherwise
+ * @note Anchored: attempts match ONLY at current cursor position
+ * @note Duplicate chars in charset are ignored; order is irrelevant
+ * @note Faster than alternation: ANY("AEIOU") vs 'A'|'E'|'I'|'O'|'U'
+ */
+bool any(view_t* subject, const char* charset);
 
-
-// Match exactly ONE character from charset
-// SNOBOL: ANY('...')
-// SUCCESS: cursor++                     (char in charset)
-// FAILURE: cursor unchanged             (char not in charset or EOF)
-// RETURNS: true if matched, false otherwise
-bool any(view_t* subject, view_t charset);
-
-// Match exactly ONE character NOT in charset
-// SNOBOL: NOTANY('...')
-// SUCCESS: cursor++                     (char not in charset)
-// FAILURE: cursor unchanged             (char in charset or EOF)
-// RETURNS: true if matched, false otherwise
-bool notany(view_t* subject, view_t charset);
+/**
+ * 2.9 SNOBOL NOTANY(charset)
+ * @brief match exactly ONE character NOT in charset (anchored)
+ * SUCCESS: cursor advanced by 1 (char matched)
+ * FAILURE: cursor unchanged (char in charset, empty subject)
+ * @param subject  parsing context (mutated on success)
+ * @param charset  null-terminated C string defining excluded characters
+ * @return true if matched, false otherwise
+ * @note Anchored: attempts match ONLY at current cursor position
+ * @note Empty charset matches ANY character (nothing is excluded)
+ */
+bool notany(view_t* subject, const char* charset);
 
 // Skip 0+ characters from charset (idempotent whitespace skipping)
 // SNOBOL: (SPAN('...') | NULL)

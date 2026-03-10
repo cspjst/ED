@@ -1,12 +1,15 @@
 #include "sno.h"
 
-// Internal helper function - check if a single character is in the given charset
-// SUCCESS: returns true (character found in charset)
-// FAILURE: returns false (character not in charset or empty set)
+// Helper functions
 static bool char_in_set(char c, view_t charset) {
     cursor_t p = charset.begin;
     while (p < charset.end && *p != c) p++;
     return p != charset.end;
+}
+
+static bool char_in_cstr(char c, const char* charset) {
+    while (*charset && *charset != c) charset++;
+    return *charset != '\0';
 }
 
 // Construction and sizing
@@ -73,10 +76,10 @@ bool num(view_t* subject, int* n) {
     if (!char_in_set(*subject->begin, bind("+-0123456789"))) return false;
 
     view_t temp = *subject;
-    any(&temp, bind("+-"));  // optional sign (atomic)
+    any(&temp, "+-");  // optional sign (atomic)
 
     cursor_t p = temp.begin;
-    if (!span(&temp, bind("0123456789"))) return false;  // require digits
+    if (!span(&temp, "0123456789")) return false;  // require digits
 
     int num = 0;
     while (p < temp.begin) {
@@ -107,53 +110,55 @@ unsigned int at(view_t* subject, cursor_t p) {
 
 // 2.8
 bool len(view_t* subject, unsigned int length) {
-    if (!subject || !subject->begin) return false;
-    if ((size_t)(subject->end - subject->begin) < length) return false;
+    if (!subject || !subject->begin || size(*subject) < length) return false;
     subject->begin += length;
     return true;
 }
 
-bool any(view_t* subject, view_t charset) {
-    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
-    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
-    if (charset.begin >= charset.end) return false;     // empty set always fails
-
-    if (!char_in_set(*subject->begin, charset)) return false;
-    subject->begin++;
-    return true;
-}
-
-bool notany(view_t* subject, view_t charset) {
-    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
-    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
-
-    if (charset.begin >= charset.end) {
-        subject->begin++;
-        return true;  // empty charset matches any char
-    }
-
-    if (char_in_set(*subject->begin, charset)) return false;
-    subject->begin++;
-    return true;
-}
-
-bool span(view_t* subject, view_t charset) {
-    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
-    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
-    if (charset.begin >= charset.end) return false;     // empty set always fails
+// 2.9
+bool span(view_t* subject, const char* charset) {
+    if (!subject || !subject->begin || !subject->end || !charset) return false;
+    if (subject->begin >= subject->end) return false;   // 1+ requires non-empty subject
+    if (*charset == '\0') return false;                 // empty charset always fails
 
     cursor_t start = subject->begin;
-    while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
+    while (subject->begin < subject->end && char_in_cstr(*subject->begin, charset))
         subject->begin++;
-    return subject->begin != start;
+    return subject->begin != start;  // true iff ≥1 char matched
 }
 
-bool brk(view_t* subject, view_t charset) {
-    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
+bool brk(view_t* subject, const char* charset) {
+    if (!subject || !subject->begin || !subject->end || !charset) return false;
     // 0+ semantics: empty subject is VALID (skip 0 chars)
-    while (subject->begin < subject->end && !char_in_set(*subject->begin, charset))
+    // Empty charset is also valid — will consume entire subject
+    while (subject->begin < subject->end && !char_in_cstr(*subject->begin, charset))
         subject->begin++;
     return true;  // always succeeds for valid inputs
+}
+
+bool any(view_t* subject, const char* charset) {
+    if (!subject || !subject->begin || !subject->end || !charset) return false;
+    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
+    if (*charset == '\0') return false;                 // empty charset always fails
+
+    if (!char_in_cstr(*subject->begin, charset)) return false;
+    subject->begin++;
+    return true;
+}
+
+bool notany(view_t* subject, const char* charset) {
+    if (!subject || !subject->begin || !subject->end || !charset) return false;
+    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
+
+    // Empty charset: nothing excluded, so any char matches
+    if (*charset == '\0') {
+        subject->begin++;
+        return true;
+    }
+
+    if (char_in_cstr(*subject->begin, charset)) return false;
+    subject->begin++;
+    return true;
 }
 
 bool skip(view_t* subject, view_t charset) {

@@ -200,6 +200,141 @@ void test_chr(void) {
     assert(chr(&sub, 'A') && chr(&sub, '\0') && *sub.begin == 'B');
 }
 
+void test_var(void) {
+    char buf[20];
+    view_t sub;
+
+    sub = bind("TEST");
+    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "TEST") == 0 && sub.begin == sub.end);
+
+    sub = bind("");
+    assert(var(&sub, buf, sizeof(buf)) && buf[0] == '\0' && sub.begin == sub.end);
+
+    sub = bind("12345");
+    cursor_t orig = sub.begin;
+    assert(!var(&sub, buf, 5) && sub.begin == orig);
+
+    sub = bind("ABC");
+    orig = sub.begin;
+    assert(!var(&sub, buf, 3) && sub.begin == orig);
+
+    sub = bind("X");
+    orig = sub.begin;
+    assert(!var(&sub, buf, 0) && sub.begin == orig);
+
+    sub = bind("SAFE");
+    orig = sub.begin;
+    assert(!var(&sub, NULL, sizeof(buf)) && sub.begin == orig);
+
+    assert(!var(NULL, buf, sizeof(buf)));
+
+    sub = view(NULL, NULL);
+    assert(!var(&sub, buf, sizeof(buf)) && !sub.begin && !sub.end);
+
+    char composite[] = "PREFIXHELLOSUFFIX";
+    sub = view(&composite[6], &composite[11]);
+    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "HELLO") == 0 && sub.begin == sub.end);
+
+    char cmd[] = "15L";
+    sub = bind(cmd);
+    span(&sub, "0123456789");
+    view_t num_view = view(cmd, sub.begin);
+    assert(var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
+    assert(str(&sub, "L"));
+}
+
+void test_num(void) {
+    view_t sub;
+    int n;
+
+    // Valid positives (within edlin's actual usage range)
+    sub = bind("123");
+    assert(num(&sub, &n) && n == 123 && sub.begin == sub.end);
+
+    sub = bind("+456");
+    assert(num(&sub, &n) && n == 456 && sub.begin == sub.end);
+
+    sub = bind("0");
+    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
+
+    // Portable max/min guaranteed by C standard (all vintage systems support these)
+    sub = bind("32767");   // Max portable positive (C standard min range)
+    assert(num(&sub, &n) && n == 32767 && sub.begin == sub.end);
+
+    sub = bind("-32767");  // Min portable negative (C standard min range)
+    assert(num(&sub, &n) && n == -32767 && sub.begin == sub.end);
+
+    // Realistic edlin line numbers (safe for 16-bit and 32-bit)
+    sub = bind("9999");
+    assert(num(&sub, &n) && n == 9999 && sub.begin == sub.end);
+
+    // Stop at NOTANY boundary
+    sub = bind("123x");
+    assert(num(&sub, &n) && n == 123 && *sub.begin == 'x');
+
+    sub = bind("-456y");
+    assert(num(&sub, &n) && n == -456 && *sub.begin == 'y');
+
+    // Fail on invalid first char
+    sub = bind("x123");
+    assert(!num(&sub, &n));
+
+    sub = bind(" 123");
+    assert(!num(&sub, &n));
+
+    sub = bind("");
+    assert(!num(&sub, &n));
+
+    // Reject malformed signs
+    sub = bind("+");
+    assert(!num(&sub, &n));
+
+    sub = bind("-");
+    assert(!num(&sub, &n));
+
+    sub = bind("++1");
+    assert(!num(&sub, &n));
+
+    sub = bind("--1");
+    assert(!num(&sub, &n));
+
+    sub = bind("+-1");
+    assert(!num(&sub, &n));
+
+    sub = bind("-+1");
+    assert(!num(&sub, &n));
+
+    sub = bind("-x");
+    assert(!num(&sub, &n));
+
+    sub = bind("+y");
+    assert(!num(&sub, &n));
+
+    sub = bind("-0");
+    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
+
+    // Atomic rollback on failure
+    char buf[] = "x123";
+    sub = bind(buf);
+    cursor_t orig = sub.begin;
+    assert(!num(&sub, &n) && sub.begin == orig);
+
+    // NULL safety
+    assert(!num(NULL, &n));
+
+    sub = view(NULL, NULL);
+    assert(!num(&sub, &n));
+
+    char buf1[] = "123";
+    sub = view(buf1, NULL);
+    orig = sub.begin;
+    assert(!num(&sub, &n) && sub.begin == orig && sub.end == NULL);
+
+    char buf2[] = "123";
+    sub = view(NULL, buf2);
+    assert(!num(&sub, &n) && !sub.begin && sub.end == buf2);
+}
+
 void test_at(void) {
     view_t original, cursor;
     unsigned int pos;
@@ -320,11 +455,24 @@ void test_len(void) {
     orig = sub.begin;
     assert(!len(&sub, 1) && sub.begin == orig);
 
+    // Composition: len() skips payload, chr() matches delimiters
+    // Pattern: "A?B?C?" where ? is any single char
+    char buf9[] = "A1B2C3";
+    sub = bind(buf9);
+    assert(chr(&sub, 'A') &&  // Match delimiter 'A'
+           len(&sub, 1) &&    // Skip payload '1'
+           chr(&sub, 'B') &&  // Match delimiter 'B'
+           len(&sub, 1) &&    // Skip payload '2'
+           chr(&sub, 'C') &&  // Match delimiter 'C'
+           len(&sub, 1) &&    // Skip payload '3'
+           sub.begin == sub.end);
+
     // Inverted view (begin > end): len() should fail safely
     char buf11[] = "X";
     sub = view(&buf11[1], &buf11[0]);
     orig = sub.begin;
-    assert(!len(&sub, 1) && sub.begin == orig);
+    assert(!len(&sub, 1));
+    assert(sub.begin == orig);
 
     // View with offset: len() operates relative to current begin
     char buf12[] = "PREFIX12345SUFFIX";
@@ -341,9 +489,12 @@ void test_len(void) {
     char buf13[] = "ABC";
     sub = bind(buf13);
     orig = sub.begin;
-    assert(!len(&sub, 10));  // Fails, cursor unchanged
-    assert(sub.begin == orig);
-    assert(len(&sub, 1) && chr(&sub, 'A'));  // Subsequent match still works
+    assert(!len(&sub, 10) && sub.begin == orig);  // Fails, cursor unchanged at 'A'
+    assert(chr(&sub, 'A'));                        // Match 'A' at current position - works!
+
+    // Chaining: successful len() composes with next primitive
+    sub = bind(buf13);  // Reset
+    assert(len(&sub, 1) && chr(&sub, 'B') && chr(&sub, 'C') && sub.begin == sub.end);
 
     // Real-world: parse fixed-width record "ID:12345NAME:JOHN  "
     char record[] = "ID:12345NAME:JOHN  ";
@@ -360,290 +511,355 @@ void test_len(void) {
     memcpy(buf, start, 6); buf[6] = '\0';
     assert(strncmp(buf, "JOHN  ", 6) == 0);
 
-    printf("len() tests pass!\n");
-}
-
-
-
-void test_any(void) {
-    view_t sub;
-    cursor_t orig;
-
-    char buf1[] = "XYZ";
-    sub = bind(buf1);
-    orig = sub.begin;
-    assert(any(&sub, bind("XYZ")) && sub.begin == orig + 1 && *sub.begin == 'Y');
-
-    char buf2[] = "!5";
-    sub = bind(buf2);
-    orig = sub.begin;
-    assert(any(&sub, bind("!@#$%")) && sub.begin == orig + 1 && *sub.begin == '5');
-
-    char buf3[] = "X";
-    sub = bind(buf3);
-    orig = sub.begin;
-    assert(!any(&sub, bind("ABC")) && sub.begin == orig);
-
-    sub = bind("");
-    orig = sub.begin;
-    assert(!any(&sub, bind("A")) && sub.begin == orig);
-
-    char buf4[] = "A";
-    sub = bind(buf4);
-    orig = sub.begin;
-    assert(!any(&sub, bind("")) && sub.begin == orig);
-
-    assert(!any(NULL, bind("A")));
-
-    sub = view(NULL, NULL);
-    assert(!any(&sub, bind("A")) && !sub.begin && !sub.end);
-
-    char buf5[] = "A";
-    sub = view(buf5, NULL);
-    orig = sub.begin;
-    assert(!any(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
-
-    char buf6[] = "A";
-    sub = view(NULL, buf6);
-    assert(!any(&sub, bind("A")) && !sub.begin && sub.end == buf6);
-
-    char buf7[] = "a";
-    sub = bind(buf7);
-    orig = sub.begin;
-    assert(!any(&sub, bind("A")) && sub.begin == orig);
-
-    char buf8[] = "AAA";
-    sub = bind(buf8);
-    orig = sub.begin;
-    assert(any(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
-
-    char buf9[] = "123abc";
-    sub = bind(buf9);
-    int count = 0;
-    while (any(&sub, bind("0123456789"))) count++;
-    assert(count == 3 && strncmp(sub.begin, "abc", 3) == 0);
-
-    char buf10[] = "Z";
-    sub = bind(buf10);
-    assert(any(&sub, bind("Z")) && sub.begin == sub.end);
-
-    char buf11[] = "!!!END";
-    sub = bind(buf11);
-    orig = sub.begin;
-    assert(any(&sub, bind("!")) && sub.begin == orig + 1 && *sub.begin == '!');
-
-    char buf12[] = "!!!END";
-    sub = view(&buf12[2], &buf12[0]);
-    orig = sub.begin;
-    assert(!any(&sub, bind("!")) && sub.begin == orig);
-}
-
-void test_notany(void) {
-    view_t sub;
-    cursor_t orig;
-
-    char buf1[] = "X9Z";
-    sub = bind(buf1);
-    orig = sub.begin;
-    assert(notany(&sub, bind("012345678")) && sub.begin == orig + 1 && *sub.begin == '9');
-
-    char buf2[] = "A";
-    sub = bind(buf2);
-    orig = sub.begin;
-    assert(notany(&sub, bind("")) && sub.begin == orig + 1 && sub.begin == sub.end);
-
-    char buf3[] = "5";
-    sub = bind(buf3);
-    orig = sub.begin;
-    assert(!notany(&sub, bind("0123456789")) && sub.begin == orig);
-
-    char buf4[] = "";
-    sub = bind(buf4);
-    orig = sub.begin;
-    assert(!notany(&sub, bind("A")) && sub.begin == orig);
-
-    char buf5[] = "Z";
-    sub = bind(buf5);
-    assert(notany(&sub, bind("ABC")) && sub.begin == sub.end);
-    orig = sub.begin;
-    assert(!notany(&sub, bind("A")) && sub.begin == orig);
-
-    assert(!notany(NULL, bind("A")));
-
-    sub = view(NULL, NULL);
-    assert(!notany(&sub, bind("A")) && !sub.begin && !sub.end);
-
-    char buf6[] = "A";
-    sub = view(buf6, NULL);
-    orig = sub.begin;
-    assert(!notany(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
-
-    char buf7[] = "A";
-    sub = view(NULL, buf7);
-    assert(!notany(&sub, bind("A")) && !sub.begin && sub.end == buf7);
-
-    char buf8[] = "a";
-    sub = bind(buf8);
-    orig = sub.begin;
-    assert(!notany(&sub, bind("a")) && sub.begin == orig);
-
-    char buf9[] = "FIELD,REST";
-    sub = bind(buf9);
-    while (notany(&sub, bind(","))) ;
-    assert(*sub.begin == ',');
-
-    char buf10[] = "FIELD,REST";
-    sub = view(&buf10[2], &buf10[0]);
-    orig = sub.begin;
-    assert(!notany(&sub, bind(",")) && sub.begin == orig);
 }
 
 void test_span(void) {
     view_t sub;
     cursor_t orig;
 
-    char buf1[] = "A123";
+    // Basic: match digits greedily
+    char buf1[] = "123abc";
     sub = bind(buf1);
     orig = sub.begin;
-    assert(span(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == '1');
+    assert(span(&sub, "0123456789") && sub.begin == orig + 3 && *sub.begin == 'a');
 
-    char buf2[] = "12345abc";
+    // Failure: first char not in charset (anchored: no scanning)
+    char buf2[] = "abc123";
     sub = bind(buf2);
     orig = sub.begin;
-    assert(span(&sub, bind("0123456789")) && sub.begin == orig + 5 && *sub.begin == 'a');
+    assert(!span(&sub, "0123456789") && sub.begin == orig);
 
-    char buf3[] = "999";
+    // Empty charset always fails
+    char buf3[] = "123";
     sub = bind(buf3);
-    assert(span(&sub, bind("0123456789")) && sub.begin == sub.end);
+    orig = sub.begin;
+    assert(!span(&sub, "") && sub.begin == orig);
 
-    char buf4[] = "X123";
+    // Composition: span + chr for token parsing
+    char buf4[] = "123,456";
     sub = bind(buf4);
-    orig = sub.begin;
-    assert(!span(&sub, bind("0123456789")) && sub.begin == orig);
+    assert(span(&sub, "0123456789") && chr(&sub, ',') && span(&sub, "0123456789"));
 
-    char buf5[] = "";
+    // Composition: span + len for fixed+variable field
+    char buf5[] = "ID:12345";
     sub = bind(buf5);
-    orig = sub.begin;
-    assert(!span(&sub, bind("A")) && sub.begin == orig);
+    assert(str(&sub, "ID:") && span(&sub, "0123456789") && sub.begin == sub.end);
 
-    char buf6[] = "A";
-    sub = bind(buf6);
-    orig = sub.begin;
-    assert(!span(&sub, bind("")) && sub.begin == orig);
+    // 1. Run of blanks: SPAN(' ')
+    char sbuf1[] = "   TEXT";
+    view_t s = bind(sbuf1);
+    assert(span(&s, " ") && s.begin == &sbuf1[3] && *s.begin == 'T');
 
-    char buf7[] = "aaaabbb";
-    sub = bind(buf7);
-    orig = sub.begin;
-    assert(span(&sub, bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    // 2. String of digits: SPAN('0123456789')
+    char sbuf2[] = "123abc";
+    s = bind(sbuf2);
+    assert(span(&s, "0123456789") && s.begin == &sbuf2[3] && *s.begin == 'a');
 
-    char buf8[] = "321cba";
-    sub = bind(buf8);
-    orig = sub.begin;
-    assert(span(&sub, bind("abc123")) && sub.begin == orig + 6 && sub.begin == sub.end);
-
-    char buf9[] = "aAaA";
-    sub = bind(buf9);
-    orig = sub.begin;
-    assert(span(&sub, bind("a")) && sub.begin == orig + 1 && *sub.begin == 'A');
-
-    char buf10[] = "123,456,789";
-    sub = bind(buf10);
-    assert(span(&sub, bind("0123456789")) && str(&sub, ",") && span(&sub, bind("0123456789")) && *sub.begin == ',');
-
-    assert(!span(NULL, bind("A")));
-
-    sub = view(NULL, NULL);
-    assert(!span(&sub, bind("A")) && !sub.begin && !sub.end);
-
-    char buf11[] = "A";
-    sub = view(buf11, NULL);
-    orig = sub.begin;
-    assert(!span(&sub, bind("A")) && sub.begin == orig && sub.end == NULL);
-
-    char buf12[] = "A";
-    sub = view(NULL, buf12);
-    assert(!span(&sub, bind("A")) && !sub.begin && sub.end == buf12);
-
-    char buf13[] = "Z";
-    sub = bind(buf13);
-    assert(span(&sub, bind("Z")) && sub.begin == sub.end);
-
-    char buf14[] = "AAA";
-    sub = bind(buf14);
-    orig = sub.begin;
-    assert(span(&sub, bind("A")) && sub.begin == orig + 3);
-    sub = bind(buf14);
-    orig = sub.begin;
-    assert(span(&sub, bind("XYZA")) && sub.begin == orig + 3);
-
-    char buf15[] = "AAA";
-    sub = view(&buf15[2], &buf15[0]);
-    orig = sub.begin;
-    assert(!span(&sub, bind("A")) && sub.begin == orig);
+    // 3. Word (uppercase letters): SPAN('ABCDEFGHIJKLMNOPQRSTUVWXYZ')
+    char sbuf3[] = "HELLO WORLD";
+    s = bind(sbuf3);
+    assert(span(&s, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") &&
+           s.begin == &sbuf3[5] && *s.begin == ' ');
 }
 
 void test_brk(void) {
     view_t sub;
     cursor_t orig;
+    char buf[64];
 
-    char buf1[] = "FIELD,REST";
+    // Green Book Example 1: BREAK(' ') — everything up to next blank
+    char buf1[] = "HELLO WORLD";
     sub = bind(buf1);
     orig = sub.begin;
-    assert(brk(&sub, bind(",")) && sub.begin == orig + 5 && *sub.begin == ',');
+    assert(brk(&sub, " ") && sub.begin == orig + 5 && *sub.begin == ' ');
 
-    char buf2[] = ",REST";
+    // Verify we captured "HELLO"
+    sub = bind(buf1);
+    cursor_t start = sub.begin;
+    assert(brk(&sub, " "));
+    size_t len = sub.begin - start;
+    assert(len == 5 && strncmp(start, "HELLO", len) == 0);
+
+    // Green Book Example 2: BREAK(',.;:!?') — everything up to punctuation
+    char buf2[] = "Hello, world!";
     sub = bind(buf2);
     orig = sub.begin;
-    assert(brk(&sub, bind(",")) && sub.begin == orig && *sub.begin == ',');
+    assert(brk(&sub, ",.;:!?") && sub.begin == orig + 5 && *sub.begin == ',');
 
-    char buf3[] = "FIELD";
+    // No punctuation found — consumes to end
+    char buf3[] = "No punctuation here";
     sub = bind(buf3);
-    assert(brk(&sub, bind(",")) && sub.begin == sub.end);
+    assert(brk(&sub, ",.;:!?") && sub.begin == sub.end);
 
-    char buf4[] = "";
+    // Green Book Example 3: BREAK('+-0123456789') — everything up to number
+    char buf4[] = "Value: 123";
     sub = bind(buf4);
-    assert(brk(&sub, bind(",")) && sub.begin == sub.end);
+    orig = sub.begin;
+    assert(brk(&sub, "+-0123456789") && sub.begin == orig + 7 && *sub.begin == '1');
 
-    char buf5[] = "TEST";
+    // Verify we captured "Value: "
+    sub = bind(buf4);
+    start = sub.begin;
+    assert(brk(&sub, "+-0123456789"));
+    len = sub.begin - start;
+    assert(len == 7 && strncmp(start, "Value: ", len) == 0);
+
+    // Zero-match: first char IS in charset (still succeeds)
+    char buf5[] = ",rest";
     sub = bind(buf5);
-    assert(brk(&sub, bind("")) && sub.begin == sub.end);
+    orig = sub.begin;
+    assert(brk(&sub, ",.;:!?") && sub.begin == orig && *sub.begin == ',');
 
-    char buf6[] = "aaaabbb";
+    // Empty subject: succeeds, cursor unchanged
+    char buf6[] = "";
     sub = bind(buf6);
     orig = sub.begin;
-    assert(brk(&sub, bind("b")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    assert(brk(&sub, " ") && sub.begin == orig);
 
-    char buf7[] = "aAaA";
+    // Empty charset: consumes entire subject (nothing to stop on)
+    char buf7[] = "EVERYTHING";
+    sub = bind(buf7);
+    assert(brk(&sub, "") && sub.begin == sub.end);
+
+    // Composition: brk() + chr() to consume delimiter
+    char buf8[] = "FIELD,REST";
+    sub = bind(buf8);
+    assert(brk(&sub, ",") && chr(&sub, ',') && brk(&sub, ",") && sub.begin == sub.end);
+
+    // Composition: brk() + span() for token parsing
+    char buf9[] = "  123  456  ";
+    sub = bind(buf9);
+    assert(brk(&sub, "0123456789") &&  // Skip leading spaces
+           span(&sub, "0123456789") &&  // Match digits
+           brk(&sub, "0123456789") &&  // Skip trailing spaces
+           span(&sub, "0123456789") &&  // Match more digits
+           brk(&sub, "0123456789"));    // Skip final spaces
+
+    // Composition: brk() + var() to extract token
+    char buf10[] = "KEY=value";
+    sub = bind(buf10);
+    start = sub.begin;
+    assert(brk(&sub, "="));  // Stop at '='
+    len = sub.begin - start;
+    assert(len == 3 && strncmp(start, "KEY", len) == 0);
+    assert(chr(&sub, '=') && var(&sub, buf, sizeof(buf)) && strcmp(buf, "value") == 0);
+
+    // NULL safety
+    assert(!brk(NULL, " "));
+    sub = view(NULL, NULL);
+    assert(!brk(&sub, " "));
+    sub = bind("TEST");
+    assert(!brk(&sub, NULL));
+
+    // Inverted view: succeeds (0 chars to skip), cursor unchanged
+    char buf11[] = "X";
+    sub = view(&buf11[1], &buf11[0]);
+    cursor_t orig_begin = sub.begin;
+    cursor_t orig_end = sub.end;
+    assert(brk(&sub, " ") && sub.begin == orig_begin && sub.end == orig_end);
+
+    // Multiple brk() calls are idempotent at charset boundary
+    char buf12[] = "TEXT,MORE";
+    sub = bind(buf12);
+    assert(brk(&sub, ",") && sub.begin == &buf12[4]);  // At comma
+    orig = sub.begin;
+    assert(brk(&sub, ",") && sub.begin == orig);  // Still at comma (0 chars skipped)
+
+    // Real-world: parse CSV field
+    char csv[] = "field1,field2,field3";
+    sub = bind(csv);
+    assert(brk(&sub, ",") && chr(&sub, ',') &&
+           brk(&sub, ",") && chr(&sub, ',') &&
+           brk(&sub, ",") && sub.begin == sub.end);
+
+    // Real-world: extract filename from path
+    char path[] = "/usr/local/bin/program";
+    sub = bind(path);
+    assert(brk(&sub, "/") && chr(&sub, '/') &&  // Skip "", match '/'
+            brk(&sub, "/") && chr(&sub, '/') &&  // Skip "usr", match '/'
+            brk(&sub, "/") && chr(&sub, '/') &&  // Skip "local", match '/'
+            brk(&sub, "/") && chr(&sub, '/') &&  // Skip "bin", match '/'
+            var(&sub, buf, sizeof(buf)) && strcmp(buf, "program") == 0);
+}
+
+void test_any(void) {
+    view_t sub;
+    cursor_t orig;
+    char buf[64];
+
+    // Green Book Example: ANY('AEIOU') matches any vowel
+    char buf1[] = "HELLO";
+    sub = bind(buf1);
+    sub.begin++;  // Position cursor at 'E'
+    assert(any(&sub, "AEIOU") && *sub.begin == 'L');  // 'E' matched, now at 'L'
+
+    // Verify failure on non-vowel
+    sub = bind(buf1);  // Reset to start
+    orig = sub.begin;
+    assert(!any(&sub, "AEIOU") && sub.begin == orig);  // 'H' not in set, cursor unchanged
+
+    // NOTANY('AEIOU') matches non-vowels
+    char buf2[] = "HELLO";
+    sub = bind(buf2);
+    assert(notany(&sub, "AEIOU") && *sub.begin == 'E');  // 'H' not a vowel, matched, now at 'E'
+
+    // Verify failure on vowel
+    sub = bind(buf2);
+    sub.begin++;  // Position at 'E'
+    orig = sub.begin;
+    assert(!notany(&sub, "AEIOU") && sub.begin == orig);  // 'E' IS vowel, cursor unchanged
+
+    // Green Book: Duplicate/irrelevant order in charset
+    char buf3[] = "TEST";
+    sub = bind(buf3);
+    assert(any(&sub, "STRUCTURE") && *sub.begin == 'E');  // 'T' in set
+    sub = bind(buf3);
+    assert(any(&sub, "CERSTU") && *sub.begin == 'E');     // Same result, different order
+
+    // Basic match: single character from set
+    char buf4[] = "XYZ";
+    sub = bind(buf4);
+    orig = sub.begin;
+    assert(any(&sub, "XYZ") && sub.begin == orig + 1 && *sub.begin == 'Y');
+
+    // Match at middle of string
+    sub = bind(buf4);
+    sub.begin = &buf4[1];  // Start at 'Y'
+    assert(any(&sub, "XYZ") && sub.begin == &buf4[2] && *sub.begin == 'Z');
+
+    // Failure: character not in charset
+    char buf5[] = "ABC";
+    sub = bind(buf5);
+    orig = sub.begin;
+    assert(!any(&sub, "XYZ") && sub.begin == orig);
+
+    // Failure: empty subject
+    char buf6[] = "";
+    sub = bind(buf6);
+    orig = sub.begin;
+    assert(!any(&sub, "A") && sub.begin == orig);
+
+    // Failure: empty charset
+    char buf7[] = "A";
     sub = bind(buf7);
     orig = sub.begin;
-    assert(brk(&sub, bind("A")) && sub.begin == orig + 1 && *sub.begin == 'A');
+    assert(!any(&sub, "") && sub.begin == orig);
 
-    char buf8[] = "123,456,789";
-    sub = bind(buf8);
-    assert(brk(&sub, bind(",")) && any(&sub, bind(",")) && brk(&sub, bind(",")) && any(&sub, bind(",")) && brk(&sub, bind(",")) && sub.begin == sub.end);
-
-    assert(!brk(NULL, bind(",")));
-
+    // NULL safety
+    assert(!any(NULL, "A"));
     sub = view(NULL, NULL);
-    assert(!brk(&sub, bind(",")) && !sub.begin && !sub.end);
+    assert(!any(&sub, "A"));
+    sub = bind("TEST");
+    assert(!any(&sub, NULL));
 
-    char buf9[] = "A";
-    sub = view(buf9, NULL);
+    // Case sensitivity: 'a' != 'A'
+    char buf8[] = "aA";
+    sub = bind(buf8);
     orig = sub.begin;
-    assert(!brk(&sub, bind(",")) && sub.begin == orig && sub.end == NULL);
+    assert(any(&sub, "a") && *sub.begin == 'A');
+    sub = bind(buf8);
+    orig = sub.begin;
+    assert(!any(&sub, "A") && sub.begin == orig);
 
-    char buf10[] = "A";
-    sub = view(NULL, buf10);
-    assert(!brk(&sub, bind(",")) && !sub.begin && sub.end == buf10);
+    // Special characters: match space, punctuation, etc.
+    char buf9[] = " !@#";
+    sub = bind(buf9);
+    assert(any(&sub, " !@") && *sub.begin == '!');      // ' ' matched, now at '!'
+    assert(any(&sub, " !@#") && *sub.begin == '@');     // '!' matched, now at '@'
+    assert(any(&sub, " !@#") && *sub.begin == '#');     // '@' matched, now at '#'
+    assert(any(&sub, " !@#") && sub.begin == sub.end);  // '#' matched, now at EOF
 
-    char buf11[] = "Z";
+    // Verify failure on char not in set
+    sub = bind(buf9);
+    sub.begin = &buf9[3];  // Position at '#'
+    orig = sub.begin;
+    assert(!any(&sub, " !@") && sub.begin == orig);  // '#' not in " !@", cursor unchanged
+
+    // Numeric characters
+    char buf10[] = "012";
+    sub = bind(buf10);
+    assert(any(&sub, "0123456789") && any(&sub, "0123456789") &&
+           any(&sub, "0123456789") && sub.begin == sub.end);
+
+    // Composition: any() in chain for token parsing
+    char buf11[] = "A1B2";
     sub = bind(buf11);
-    assert(brk(&sub, bind("A")) && sub.begin == sub.end);
+    assert(any(&sub, "AB") && any(&sub, "0123456789") &&
+           any(&sub, "AB") && any(&sub, "0123456789") &&
+           sub.begin == sub.end);
 
-    char buf12[] = "ABcDE";
+    // Composition: any() + brk() for "first of set, then rest"
+    char buf12[] = "KEY=value";
     sub = bind(buf12);
+    assert(any(&sub, "KLP") && brk(&sub, "=") && chr(&sub, '=') && var(&sub, buf, sizeof(buf)));
+
+    // Inverted view: fails safely (no chars to match)
+    char buf13[] = "X";
+    sub = view(&buf13[1], &buf13[0]);
     orig = sub.begin;
-    assert(brk(&sub, bind("c")) && sub.begin == orig + 2 && *sub.begin == 'c');
+    assert(!any(&sub, "X") && sub.begin == orig);
+
+    // Charset with duplicates: behavior unchanged
+    char buf14[] = "AAA";
+    sub = bind(buf14);
+    assert(any(&sub, "AAA") && any(&sub, "AAA") && any(&sub, "AAA") && sub.begin == sub.end);
+    sub = bind(buf14);
+    assert(any(&sub, "A") && any(&sub, "A") && any(&sub, "A") && sub.begin == sub.end);
+
+    // Real-world: parse hex digit
+    char hex[] = "0x1A3F";
+    sub = bind(hex);
+    assert(str(&sub, "0x") &&
+           any(&sub, "0123456789ABCDEF") &&
+           any(&sub, "0123456789ABCDEF") &&
+           any(&sub, "0123456789ABCDEF") &&
+           any(&sub, "0123456789ABCDEF") &&
+           sub.begin == sub.end);
+
+    // Real-world: match operator from set
+    char expr[] = "A+B-C";
+    sub = bind(expr);
+    assert(any(&sub, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") &&  // 'A'
+           any(&sub, "+-*/") &&                          // '+'
+           any(&sub, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") &&  // 'B'
+           any(&sub, "+-*/") &&                          // '-'
+           any(&sub, "ABCDEFGHIJKLMNOPQRSTUVWXYZ") &&  // 'C'
+           sub.begin == sub.end);
+}
+
+void test_notany(void) {
+    view_t sub;
+    cursor_t orig;
+
+    // Green Book: NOTANY('AEIOU') matches non-vowels
+    char buf1[] = "HELLO";
+    sub = bind(buf1);
+    assert(notany(&sub, "AEIOU") && *sub.begin == 'E');  // 'H' not a vowel, matched, now at 'E' ✓
+
+    sub = bind(buf1);
+    sub.begin++;  // Position at 'E'
+    orig = sub.begin;
+    assert(!notany(&sub, "AEIOU") && sub.begin == orig);  // 'E' IS a vowel, FAIL, cursor unchanged ✓
+
+    // Verify we can still match the vowel with any()
+    assert(any(&sub, "AEIOU") && *sub.begin == 'L');  // Now consume 'E', cursor at 'L' ✓
+
+    // Empty charset: matches any character
+    char buf2[] = "XYZ";
+    sub = bind(buf2);
+    assert(notany(&sub, "") && notany(&sub, "") && notany(&sub, "") && sub.begin == sub.end);
+
+    // Failure: char IS in charset
+    char buf3[] = "ABC";
+    sub = bind(buf3);
+    orig = sub.begin;
+    assert(!notany(&sub, "ABC") && sub.begin == orig);
+
+    // Composition: notany() + span() for "non-delimiter then rest"
+    char buf4[] = "FIELD,REST";
+    sub = bind(buf4);
+    assert(notany(&sub, ",") && notany(&sub, ",") && notany(&sub, ",") &&
+           notany(&sub, ",") && notany(&sub, ",") && chr(&sub, ','));
 }
 
 void test_skip(void) {
@@ -679,12 +895,12 @@ void test_skip(void) {
     char buf6[] = "15L";
     sub = bind(buf6);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && str(&sub, "L"));
+    assert(span(&sub, "0123456789") && str(&sub, "L"));
 
     char buf7[] = "  15L";
     sub = bind(buf7);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && str(&sub, "L"));
+    assert(span(&sub, "0123456789") && str(&sub, "L"));
 
     char buf8[] = "aaaabbb";
     sub = bind(buf8);
@@ -715,140 +931,7 @@ void test_skip(void) {
     assert(skip(&sub, bind(" \t")) && sub.begin == orig + 4 && *sub.begin == 'T');
 }
 
-void test_var(void) {
-    char buf[20];
-    view_t sub;
 
-    sub = bind("TEST");
-    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "TEST") == 0 && sub.begin == sub.end);
-
-    sub = bind("");
-    assert(var(&sub, buf, sizeof(buf)) && buf[0] == '\0' && sub.begin == sub.end);
-
-    sub = bind("12345");
-    cursor_t orig = sub.begin;
-    assert(!var(&sub, buf, 5) && sub.begin == orig);
-
-    sub = bind("ABC");
-    orig = sub.begin;
-    assert(!var(&sub, buf, 3) && sub.begin == orig);
-
-    sub = bind("X");
-    orig = sub.begin;
-    assert(!var(&sub, buf, 0) && sub.begin == orig);
-
-    sub = bind("SAFE");
-    orig = sub.begin;
-    assert(!var(&sub, NULL, sizeof(buf)) && sub.begin == orig);
-
-    assert(!var(NULL, buf, sizeof(buf)));
-
-    sub = view(NULL, NULL);
-    assert(!var(&sub, buf, sizeof(buf)) && !sub.begin && !sub.end);
-
-    char composite[] = "PREFIXHELLOSUFFIX";
-    sub = view(&composite[6], &composite[11]);
-    assert(var(&sub, buf, sizeof(buf)) && strcmp(buf, "HELLO") == 0 && sub.begin == sub.end);
-
-    char cmd[] = "15L";
-    sub = bind(cmd);
-    span(&sub, bind("0123456789"));
-    view_t num_view = view(cmd, sub.begin);
-    assert(var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
-    assert(str(&sub, "L"));
-}
-
-void test_num(void) {
-    view_t sub;
-    int n;
-
-    // Valid positives (within edlin's actual usage range)
-    sub = bind("123");
-    assert(num(&sub, &n) && n == 123 && sub.begin == sub.end);
-
-    sub = bind("+456");
-    assert(num(&sub, &n) && n == 456 && sub.begin == sub.end);
-
-    sub = bind("0");
-    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
-
-    // Portable max/min guaranteed by C standard (all vintage systems support these)
-    sub = bind("32767");   // Max portable positive (C standard min range)
-    assert(num(&sub, &n) && n == 32767 && sub.begin == sub.end);
-
-    sub = bind("-32767");  // Min portable negative (C standard min range)
-    assert(num(&sub, &n) && n == -32767 && sub.begin == sub.end);
-
-    // Realistic edlin line numbers (safe for 16-bit and 32-bit)
-    sub = bind("9999");
-    assert(num(&sub, &n) && n == 9999 && sub.begin == sub.end);
-
-    // Stop at NOTANY boundary
-    sub = bind("123x");
-    assert(num(&sub, &n) && n == 123 && *sub.begin == 'x');
-
-    sub = bind("-456y");
-    assert(num(&sub, &n) && n == -456 && *sub.begin == 'y');
-
-    // Fail on invalid first char
-    sub = bind("x123");
-    assert(!num(&sub, &n));
-
-    sub = bind(" 123");
-    assert(!num(&sub, &n));
-
-    sub = bind("");
-    assert(!num(&sub, &n));
-
-    // Reject malformed signs
-    sub = bind("+");
-    assert(!num(&sub, &n));
-
-    sub = bind("-");
-    assert(!num(&sub, &n));
-
-    sub = bind("++1");
-    assert(!num(&sub, &n));
-
-    sub = bind("--1");
-    assert(!num(&sub, &n));
-
-    sub = bind("+-1");
-    assert(!num(&sub, &n));
-
-    sub = bind("-+1");
-    assert(!num(&sub, &n));
-
-    sub = bind("-x");
-    assert(!num(&sub, &n));
-
-    sub = bind("+y");
-    assert(!num(&sub, &n));
-
-    sub = bind("-0");
-    assert(num(&sub, &n) && n == 0 && sub.begin == sub.end);
-
-    // Atomic rollback on failure
-    char buf[] = "x123";
-    sub = bind(buf);
-    cursor_t orig = sub.begin;
-    assert(!num(&sub, &n) && sub.begin == orig);
-
-    // NULL safety
-    assert(!num(NULL, &n));
-
-    sub = view(NULL, NULL);
-    assert(!num(&sub, &n));
-
-    char buf1[] = "123";
-    sub = view(buf1, NULL);
-    orig = sub.begin;
-    assert(!num(&sub, &n) && sub.begin == orig && sub.end == NULL);
-
-    char buf2[] = "123";
-    sub = view(NULL, buf2);
-    assert(!num(&sub, &n) && !sub.begin && sub.end == buf2);
-}
 
 void test_sno(void) {
     test_bind();
@@ -866,11 +949,13 @@ void test_sno(void) {
     test_at();
     // 2.8
     test_len();
-
-    test_any();
-    test_notany();
+    // 2.9
     test_span();
     test_brk();
+    // 2.10
+    test_any();
+    test_notany();
+
     test_skip();
 
     printf("All SNOBOL-C primitive tests pass!\n");
