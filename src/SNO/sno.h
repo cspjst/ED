@@ -57,16 +57,19 @@ unsigned int size(view_t view);
 
 //SNOBOL4 Primitives by Green Book sections:
 
+
 /**
- * 2.3 Scanning
- * SNOBOL: subject pattern
- * Pattern matching needs explicit literal matching functions for string and character literals:
- * @brief Match exact literal sequence (case-sensitive)
- * SUCCESS: cursor += size(pattern)  (full match)
+ * 2.3 Scanning - Match exact literal sequence (case-sensitive)
+ * SNOBOL: subject "literal"
+ * SUCCESS: cursor += strlen(match)  (full match)
  * FAILURE: cursor unchanged         (mismatch or bounds exceeded)
+ * @param subject  parsing context (mutated on success)
+ * @param match    null-terminated C string to match
  * @return true on full match, false otherwise
+ * @note Empty string ("") always matches (SNOBOL null string semantics)
+ * @note NULL match argument is an error (returns false)
  */
-bool str(view_t* subject, view_t pattern);
+bool str(view_t* subject, const char* match);
 
 /**
  * @brief Match exact literal (case-sensitive)
@@ -114,27 +117,49 @@ bool num(view_t* subject, int* n);
 /**
  * 2.6 The Null String in Pattern Matching SNOBOL NULL
  * Attempts to match the null string always succeed
- * @brief always succeeds, even if subject itself has the null string as value.
- * SUCCESS: entire view consumed (cursor = subject->end)
- * @return true
+ * @brief matches empty string at current position (consumes 0 characters)
+ * SUCCESS: cursor unchanged (matches zero-length string)
+ * FAILURE: never fails for valid inputs (NULL args return false)
+ * @return true for valid inputs, false for NULL arguments
+ *
+ * @note SNOBOL: NULL matches at any position without advancing cursor
+ * @note Useful for: optional elements, pattern alternation, termination checks
  */
 bool nul(view_t* subject);
 
 /**
  * 2.7 Cursor Position SNOBOL @
- * @brief convert cursor pointer to a 1 based index into the subject
- * @return cursor as an index into the view
+ * @brief convert cursor pointer to a 1-based index into the subject
+ * @return cursor as a 1-based index into the view, or 0 on invalid input
+ *
+ * SNOBOL: @x assigns current cursor position (1-based) to variable x
+ * This function computes that position given an explicit cursor pointer.
+ *
+ * @note Returns 0 (invalid position) for:
+ *   - NULL subject or subject->begin
+ *   - NULL cursor pointer p
+ *   - p outside the valid range [subject->begin, subject->end]
+ *
+ * @note SNOBOL uses 1-based indexing: first character is position 1
  */
 unsigned int at(view_t* subject, cursor_t p);
 
 /**
  * 2.8 SNOBOL LEN(length)
- * @brief match a string of specified length
- * SUCCESS: cursor advanced past the length
- * FAILURE: cursor unchanged (insufficient characters)
- * @return true on length characters, false otherwise
+ * @brief match a string of specified length (any characters)
+ * SUCCESS: cursor advanced by exactly length characters
+ * FAILURE: cursor unchanged (insufficient characters remain)
+ * @param subject  parsing context (mutated on success)
+ * @param length   number of characters to match
+ * @return true on success, false on failure or NULL arguments
+ * @note Content-agnostic: matches any characters, not specific values
+ * @note length=0 always succeeds (matches empty string, cursor unchanged)
  */
-bool len(unsigned int length);
+bool len(view_t* subject, unsigned int length);
+
+
+
+
 
 /**
  * 2.9 SNOBOL SPAN and BREAK

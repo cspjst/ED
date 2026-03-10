@@ -29,33 +29,31 @@ unsigned int size(view_t view) {
 }
 
 // 2.3
-bool str(view_t* subject, view_t pattern) {
-    if (!subject || !subject->begin || !pattern.begin) return false;
-    if (size(pattern) == 0) return true;    // empty pattern always matches
+// 2.3
+bool str(view_t* subject, const char* match) {
+    if (!subject || !subject->begin || !match) return false;
+    if (*match == '\0') return true; // empty match string always succeeds (SNOBOL null string semantics)
 
     cursor_t s = subject->begin;
-    cursor_t p = pattern.begin;
+    const char* m = match;
     // compare character by character while both have data
-    while (p < pattern.end && s < subject->end && *s == *p) {
+    while (*m != '\0' && s < subject->end && *s == *m) {
         s++;
-        p++;
+        m++;
     }
 
-    if (p < pattern.end) return false;  // partial match = failure
-    subject->begin = s;                 // advance cursor past the matched pattern
+    if (*m != '\0') return false;   // partial match = failure (subject ended early)
+    subject->begin = s;             // advance cursor past matched literal
     return true;
 }
 
 bool chr(view_t* subject, char c) {
-    if (!subject || !subject->begin) return false;
-
-    cursor_t s = subject->begin;
-    while (s < subject->end && *s != c) s++;
-
-    if(s == subject->end) return false; // no match = failure
-    subject->begin = s;                 // advance cursor past the matched pattern
+    if (!subject || !subject->begin || subject->begin >= subject->end) return false;
+    if (*subject->begin != c) return false; // check ONLY current character
+    subject->begin++;                       // advance cursor past matched literal
     return true;
 }
+
 // 2.5
 bool var(view_t* subject, char* buf, size_t buflen) {
     if (!subject || !subject->begin || !subject->end || !buf || buflen == 0) return false;
@@ -92,6 +90,28 @@ bool num(view_t* subject, int* n) {
     return true;
 }
 
+//2.6
+bool nul(view_t* subject) {
+    if (!subject || !subject->begin) return false;
+    // always succeeds without consuming characters
+    // cursor remains unchanged (matches empty string at current position)
+    return true;
+}
+
+// 2.7
+unsigned int at(view_t* subject, cursor_t p) {
+    if (!subject || !subject->begin || !p) return 0;
+    if (p < subject->begin || p > subject->end) return 0;  /* out of bounds */
+    return (unsigned int)(p - subject->begin) + 1u;        /* 1-based index */
+}
+
+// 2.8
+bool len(view_t* subject, unsigned int length) {
+    if (!subject || !subject->begin) return false;
+    if ((size_t)(subject->end - subject->begin) < length) return false;
+    subject->begin += length;
+    return true;
+}
 
 bool any(view_t* subject, view_t charset) {
     if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;

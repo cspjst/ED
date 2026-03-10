@@ -57,39 +57,313 @@ void test_size(void) {
 void test_str(void) {
     char input[] = "HELLO";
     view_t sub = bind(input);
-    assert(str(&sub, bind("HEL")) && sub.begin == input + 3 && *sub.begin == 'L');
+    assert(str(&sub, "HEL") && sub.begin == input + 3 && *sub.begin == 'L');
 
     sub = bind("TEST");
     cursor_t orig = sub.begin;
-    assert(!str(&sub, bind("FAIL")) && sub.begin == orig);
+    assert(!str(&sub, "FAIL") && sub.begin == orig);
 
     sub = bind("ANY");
     orig = sub.begin;
-    assert(str(&sub, bind("")) && sub.begin == orig);
+    assert(str(&sub, "") && sub.begin == orig);  // Empty string always matches
 
     sub = bind("HI");
     orig = sub.begin;
-    assert(!str(&sub, bind("HELLO")) && sub.begin == orig);
+    assert(!str(&sub, "HELLO") && sub.begin == orig);  // Pattern longer than subject
 
     sub = view(NULL, NULL);
-    assert(!str(&sub, bind("X")) && !sub.begin && !sub.end);
+    assert(!str(&sub, "X") && !sub.begin && !sub.end);  // NULL subject
 
     sub = bind("SAFE");
     orig = sub.begin;
-    assert(!str(&sub, view(NULL, NULL)) && sub.begin == orig);
+    assert(!str(&sub, NULL) && sub.begin == orig);  // NULL pattern is error
 
-    sub = view(&input[3], &input[1]);
+    sub = view(&input[3], &input[1]);  // Inverted view (begin > end)
     orig = sub.begin;
-    assert(!str(&sub, bind("X")) && sub.begin == orig);
+    assert(!str(&sub, "X") && sub.begin == orig);
 
     sub = bind("");
     orig = sub.begin;
-    assert(!str(&sub, bind("X")) && sub.begin == orig);
+    assert(!str(&sub, "X") && sub.begin == orig);  // Empty subject, non-empty pattern
 
     sub = bind("Hello");
     orig = sub.begin;
-    assert(!str(&sub, bind("HELLO")) && sub.begin == orig);
+    assert(!str(&sub, "HELLO") && sub.begin == orig);  // Case-sensitive mismatch
+
+    // Partial match at end of subject should fail
+    sub = bind("AB");
+    orig = sub.begin;
+    assert(!str(&sub, "ABC") && sub.begin == orig);
+
+    // Match exactly to end of subject should succeed
+    sub = bind("END");
+    assert(str(&sub, "END") && sub.begin == sub.end);
 }
+
+void test_chr(void) {
+    view_t sub;
+    cursor_t orig;
+
+    // Basic match: single character at current position
+    char buf1[] = "ABC";
+    sub = bind(buf1);
+    orig = sub.begin;
+    assert(chr(&sub, 'A') && sub.begin == orig + 1 && *sub.begin == 'B');
+
+    // Match at middle of string
+    sub = bind(buf1);
+    sub.begin = &buf1[1];  // Start at 'B'
+    assert(chr(&sub, 'B') && sub.begin == &buf1[2] && *sub.begin == 'C');
+
+    // Match at end of string (cursor advances to end)
+    sub = bind(buf1);
+    sub.begin = &buf1[2];  // Start at 'C'
+    assert(chr(&sub, 'C') && sub.begin == sub.end);
+
+    // Failure: character mismatch at current position
+    char buf2[] = "XYZ";
+    sub = bind(buf2);
+    orig = sub.begin;
+    assert(!chr(&sub, 'A') && sub.begin == orig);  // Cursor unchanged on failure
+
+    // Failure: empty subject (cursor at end)
+    char buf3[] = "";
+    sub = bind(buf3);
+    orig = sub.begin;
+    assert(!chr(&sub, 'X') && sub.begin == orig);
+
+    // Failure: NULL subject
+    assert(!chr(NULL, 'X'));
+
+    // Failure: subject with NULL begin
+    sub = view(NULL, buf1);
+    orig = sub.begin;
+    assert(!chr(&sub, 'X') && sub.begin == orig);
+
+    // Case sensitivity: 'a' != 'A'
+    char buf4[] = "aA";
+    sub = bind(buf4);
+    orig = sub.begin;
+    assert(chr(&sub, 'a') && *sub.begin == 'A');
+
+    sub = bind(buf4);
+    orig = sub.begin;
+    assert(!chr(&sub, 'A') && sub.begin == orig && *sub.begin == 'a');
+
+    // Special characters: match space, punctuation, etc.
+    char buf5[] = " !@#";
+    sub = bind(buf5);
+    assert(chr(&sub, ' ') && *sub.begin == '!');
+
+    sub = bind(buf5);
+    sub.begin++;  // Skip space
+    assert(chr(&sub, '!') && *sub.begin == '@');
+
+    // Numeric characters
+    char buf6[] = "012";
+    sub = bind(buf6);
+    assert(chr(&sub, '0') && chr(&sub, '1') && chr(&sub, '2') && sub.begin == sub.end);
+
+    // Atomic rollback: partial pattern fails, cursor unchanged
+    char buf7[] = "TEST";
+    sub = bind(buf7);
+    orig = sub.begin;
+    // Try to match 'X' at start of "TEST" - should fail, cursor unchanged
+    assert(!chr(&sub, 'X') && sub.begin == orig && *sub.begin == 'T');
+
+    // Chaining: multiple chr() calls in sequence
+    char buf8[] = "CAT";
+    sub = bind(buf8);
+    assert(chr(&sub, 'C') && chr(&sub, 'A') && chr(&sub, 'T') && sub.begin == sub.end);
+
+    // Chaining with failure in middle: cursor should stop at failure point
+    char buf9[] = "DOG";
+    sub = bind(buf9);
+    assert(chr(&sub, 'D') && chr(&sub, 'O'));
+    orig = sub.begin;  // Now at 'G'
+    assert(!chr(&sub, 'X') && sub.begin == orig);  // Failure leaves cursor at 'G'
+
+    // View with offset (substring view)
+    char buf10[] = "PREFIXTARGET";
+    sub = view(&buf10[6], &buf10[12]);  // "TARGET"
+    assert(chr(&sub, 'T') && chr(&sub, 'A') && chr(&sub, 'R'));
+
+    // Inverted view (begin > end) should fail safely
+    char buf11[] = "X";
+    sub = view(&buf11[1], &buf11[0]);
+    orig = sub.begin;
+    assert(!chr(&sub, 'X') && sub.begin == orig);
+
+    // Match null character (if present in buffer)
+    char buf12[] = "A\0B";  // Embedded null
+    sub = view(buf12, buf12 + 3);  // Explicit view includes null
+    assert(chr(&sub, 'A') && chr(&sub, '\0') && *sub.begin == 'B');
+}
+
+void test_at(void) {
+    view_t original, cursor;
+    unsigned int pos;
+
+    // Position at start = 1 (SNOBOL 1-based)
+    original = bind("TEST");
+    cursor = original;
+    pos = at(&original, cursor.begin);
+    assert(pos == 1);
+
+    // Position after advancing
+    str(&cursor, "TE");
+    pos = at(&original, cursor.begin);
+    assert(pos == 3);
+
+    // Position at end = length + 1
+    cursor = bind("ABC");
+    view_t b = bind("ABC");
+    cursor.begin = cursor.end;  // Advance to end
+    pos = at(&b, cursor.begin);
+    assert(pos == 4);
+
+    // Empty string: start and end both at position 1
+    original = bind("");
+    pos = at(&original, original.begin);
+    assert(pos == 1);
+    pos = at(&original, original.end);
+    assert(pos == 1);
+
+    // NULL safety
+    assert(at(NULL, original.begin) == 0);
+    assert(at(&original, NULL) == 0);
+
+    // Out of bounds safety
+    char buf[] = "X";
+    original = bind(buf);
+    assert(at(&original, buf - 1) == 0);  // Before buffer
+    assert(at(&original, buf + 2) == 0);  // After buffer
+
+    // View with offset (substring view)
+    char text[] = "PREFIXHELLOSUFFIX";
+    view_t full = bind(text);
+    view_t sub = view(&text[6], &text[11]);  // "HELLO"
+    pos = at(&full, sub.begin);
+    assert(pos == 7);  // 'H' is at position 7 in original
+    pos = at(&full, sub.end);
+    assert(pos == 12); // After 'O' is position 12
+}
+
+void test_len(void) {
+    view_t sub;
+    cursor_t orig;
+    char buf[64];
+
+    // Basic: advance cursor by exact length
+    char buf1[] = "ABCDEFGHIJ";
+    sub = bind(buf1);
+    orig = sub.begin;
+    assert(len(&sub, 5) && sub.begin == orig + 5 && *sub.begin == 'F');
+
+    // Composition: len() to skip prefix, var() captures remainder
+    // Note: var() captures [current_cursor, end), not the len() match itself
+    char buf2[] = "1234567890EXTRA";
+    sub = bind(buf2);
+    assert(len(&sub, 10) && var(&sub, buf, sizeof(buf)) &&
+           strcmp(buf, "EXTRA") == 0 && sub.begin == sub.end);
+
+    // Composition: str() to match known prefix, var() captures payload
+    char buf3[] = "HEADER:payload data";
+    sub = bind(buf3);
+    assert(str(&sub, "HEADER:") && var(&sub, buf, sizeof(buf)) &&
+           strcmp(buf, "payload data") == 0);
+
+    // Capturing a fixed-width match requires manual extraction or temp view
+    // Pattern: save start, advance with len(), copy the span manually
+    char buf4[] = "1234567890EXTRA";
+    sub = bind(buf4);
+    cursor_t start = sub.begin;
+    assert(len(&sub, 10));  // Advance cursor by 10
+    size_t matched = sub.begin - start;
+    assert(matched < sizeof(buf));
+    memcpy(buf, start, matched);
+    buf[matched] = '\0';
+    assert(strcmp(buf, "1234567890") == 0);
+    assert(str(&sub, "EXTRA"));  // Continue parsing remainder
+
+    // Failure: insufficient characters, cursor unchanged
+    char buf5[] = "SHORT";
+    sub = bind(buf5);
+    orig = sub.begin;
+    assert(!len(&sub, 10) && sub.begin == orig);
+
+    // Edge: length=0 always succeeds (matches empty, cursor unchanged)
+    char buf6[] = "TEST";
+    sub = bind(buf6);
+    orig = sub.begin;
+    assert(len(&sub, 0) && sub.begin == orig && *sub.begin == 'T');
+
+    // Edge: exact remaining length succeeds and reaches EOF
+    char buf7[] = "EXACT";
+    sub = bind(buf7);
+    assert(len(&sub, 5) && sub.begin == sub.end);
+
+    // Edge: length=0 on empty subject succeeds
+    char buf8[] = "";
+    sub = bind(buf8);
+    orig = sub.begin;
+    assert(len(&sub, 0) && sub.begin == orig);
+
+    // Failure: length=0 on NULL subject
+    assert(!len(NULL, 0));
+
+    // Failure: NULL subject with non-zero length
+    assert(!len(NULL, 5));
+
+    // Failure: subject with NULL begin
+    sub = view(NULL, buf1);
+    orig = sub.begin;
+    assert(!len(&sub, 1) && sub.begin == orig);
+
+    // Inverted view (begin > end): len() should fail safely
+    char buf11[] = "X";
+    sub = view(&buf11[1], &buf11[0]);
+    orig = sub.begin;
+    assert(!len(&sub, 1) && sub.begin == orig);
+
+    // View with offset: len() operates relative to current begin
+    char buf12[] = "PREFIX12345SUFFIX";
+    sub = view(&buf12[6], &buf12[11]);  // "12345"
+    assert(len(&sub, 3) && sub.begin == &buf12[9]);
+    assert(len(&sub, 2) && sub.begin == sub.end);
+
+    // Large length value (overflow safety): should fail, not wrap
+    sub = bind("SHORT");
+    orig = sub.begin;
+    assert(!len(&sub, UINT_MAX) && sub.begin == orig);
+
+    // Chaining: len() failures don't affect subsequent attempts
+    char buf13[] = "ABC";
+    sub = bind(buf13);
+    orig = sub.begin;
+    assert(!len(&sub, 10));  // Fails, cursor unchanged
+    assert(sub.begin == orig);
+    assert(len(&sub, 1) && chr(&sub, 'A'));  // Subsequent match still works
+
+    // Real-world: parse fixed-width record "ID:12345NAME:JOHN  "
+    char record[] = "ID:12345NAME:JOHN  ";
+    sub = bind(record);
+    assert(str(&sub, "ID:"));
+    start = sub.begin;
+    assert(len(&sub, 5));
+    memcpy(buf, start, 5); buf[5] = '\0';
+    assert(strcmp(buf, "12345") == 0);
+
+    assert(str(&sub, "NAME:"));
+    start = sub.begin;
+    assert(len(&sub, 6));
+    memcpy(buf, start, 6); buf[6] = '\0';
+    assert(strncmp(buf, "JOHN  ", 6) == 0);
+
+    printf("len() tests pass!\n");
+}
+
+
 
 void test_any(void) {
     view_t sub;
@@ -274,7 +548,7 @@ void test_span(void) {
 
     char buf10[] = "123,456,789";
     sub = bind(buf10);
-    assert(span(&sub, bind("0123456789")) && str(&sub, bind(",")) && span(&sub, bind("0123456789")) && *sub.begin == ',');
+    assert(span(&sub, bind("0123456789")) && str(&sub, ",") && span(&sub, bind("0123456789")) && *sub.begin == ',');
 
     assert(!span(NULL, bind("A")));
 
@@ -405,12 +679,12 @@ void test_skip(void) {
     char buf6[] = "15L";
     sub = bind(buf6);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && str(&sub, bind("L")));
+    assert(span(&sub, bind("0123456789")) && str(&sub, "L"));
 
     char buf7[] = "  15L";
     sub = bind(buf7);
     skip(&sub, bind(" \t"));
-    assert(span(&sub, bind("0123456789")) && str(&sub, bind("L")));
+    assert(span(&sub, bind("0123456789")) && str(&sub, "L"));
 
     char buf8[] = "aaaabbb";
     sub = bind(buf8);
@@ -481,7 +755,7 @@ void test_var(void) {
     span(&sub, bind("0123456789"));
     view_t num_view = view(cmd, sub.begin);
     assert(var(&num_view, buf, sizeof(buf)) && strcmp(buf, "15") == 0);
-    assert(str(&sub, bind("L")));
+    assert(str(&sub, "L"));
 }
 
 void test_num(void) {
@@ -580,14 +854,25 @@ void test_sno(void) {
     test_bind();
     test_view();
     test_size();
+    // 2.3
     test_str();
+    test_chr();
+    // 2.4
+    // 2.5
+    test_var();
+    test_num();
+    // 2.6
+    // 2.7
+    test_at();
+    // 2.8
+    test_len();
+
     test_any();
     test_notany();
     test_span();
     test_brk();
     test_skip();
-    test_var();
-    test_num();
+
     printf("All SNOBOL-C primitive tests pass!\n");
 }
 
