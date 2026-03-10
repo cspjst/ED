@@ -16,8 +16,8 @@
  *  + Return true/false enables natural &&/|| chaining
  *  + Only NULL arguments cause true errors (not "no match")
  */
-#ifndef SNO_H
-#define SNO_H
+#ifndef SNO_CORE_H
+#define SNO_CORE_H
 
 #include <stddef.h>
 #include <string.h>
@@ -220,15 +220,11 @@ bool any(view_t* subject, const char* charset);
  */
 bool notany(view_t* subject, const char* charset);
 
-// Skip 0+ characters from charset (idempotent whitespace skipping)
-// SNOBOL: (SPAN('...') | NULL)
-// SUCCESS: cursor advanced past all consecutive charset chars (may be 0)
-// FAILURE: never fails for valid inputs (skipping zero chars is valid)
-// RETURNS: true for all valid inputs, false ONLY for NULL arguments
-bool skip(view_t* subject, view_t charset);
-
-
-
-
+/**
+ * SNOBOL: SPAN('set') | NULL
+ * Composition example: skip() is NOT a primitive, but derived from span() + nul()
+ * Demonstrates: alternation (||) with atomic rollback enables 0+ matching
+ */
+#define skip(subject, charset) (span((subject), (charset)) || nul((subject)))
 
 #endif

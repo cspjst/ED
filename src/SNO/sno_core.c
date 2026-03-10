@@ -1,4 +1,4 @@
-#include "sno.h"
+#include "sno_core.h"
 
 // Helper functions
 static bool char_in_set(char c, view_t charset) {
@@ -95,9 +95,8 @@ bool num(view_t* subject, int* n) {
 
 //2.6
 bool nul(view_t* subject) {
-    if (!subject || !subject->begin) return false;
-    // always succeeds without consuming characters
-    // cursor remains unchanged (matches empty string at current position)
+    if (!subject || !subject->begin || !subject->end) return false;
+    // Always succeeds without consuming characters
     return true;
 }
 
@@ -159,12 +158,4 @@ bool notany(view_t* subject, const char* charset) {
     if (char_in_cstr(*subject->begin, charset)) return false;
     subject->begin++;
     return true;
-}
-
-bool skip(view_t* subject, view_t charset) {
-    if (!subject || !subject->begin || !subject->end || !charset.begin || !charset.end) return false;
-    // 0+ semantics: empty subject is VALID (skip 0 chars)
-    while (subject->begin < subject->end && char_in_set(*subject->begin, charset))
-        subject->begin++;
-    return true;  // always succeeds for valid inputs
 }

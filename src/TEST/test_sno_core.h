@@ -1,7 +1,7 @@
 #ifndef TEST_SNO_H
 #define TEST_SNO_H
 
-#include "../SNO/sno.h"
+#include "../SNO/sno_core.h"
 #include <assert.h>
 #include <string.h>
 #include <stdio.h>
@@ -869,71 +869,69 @@ void test_skip(void) {
     char buf1[] = "   TEXT";
     sub = bind(buf1);
     orig = sub.begin;
-    assert(skip(&sub, bind(" \t")) && sub.begin == orig + 3 && *sub.begin == 'T');
+    assert(skip(&sub, " \t") && sub.begin == orig + 3 && *sub.begin == 'T');
 
     char buf2[] = "TEXT";
     sub = bind(buf2);
     orig = sub.begin;
-    assert(skip(&sub, bind(" \t")) && sub.begin == orig && *sub.begin == 'T');
+    assert(skip(&sub, " \t") && sub.begin == orig && *sub.begin == 'T');
 
     char buf3[] = "";
     sub = bind(buf3);
     orig = sub.begin;
-    assert(skip(&sub, bind(" ")) && sub.begin == orig);
+    assert(skip(&sub, " ") && sub.begin == orig);
 
     char buf4[] = "TEXT";
     sub = bind(buf4);
     orig = sub.begin;
-    assert(skip(&sub, bind("")) && sub.begin == orig);
+    assert(skip(&sub, "") && sub.begin == orig);
 
     char buf5[] = "   TEXT";
     sub = bind(buf5);
-    assert(skip(&sub, bind(" ")));
+    assert(skip(&sub, " "));
     orig = sub.begin;
-    assert(skip(&sub, bind(" ")) && sub.begin == orig);
+    assert(skip(&sub, " ") && sub.begin == orig);
 
     char buf6[] = "15L";
     sub = bind(buf6);
-    skip(&sub, bind(" \t"));
+    skip(&sub, " \t");
     assert(span(&sub, "0123456789") && str(&sub, "L"));
 
     char buf7[] = "  15L";
     sub = bind(buf7);
-    skip(&sub, bind(" \t"));
+    skip(&sub, " \t");
     assert(span(&sub, "0123456789") && str(&sub, "L"));
 
     char buf8[] = "aaaabbb";
     sub = bind(buf8);
     orig = sub.begin;
-    assert(skip(&sub, bind("a")) && sub.begin == orig + 4 && *sub.begin == 'b');
+    assert(skip(&sub, "a") && sub.begin == orig + 4 && *sub.begin == 'b');
 
-    assert(!skip(NULL, bind(" ")));
+    assert(!skip(NULL, " "));
 
     sub = view(NULL, NULL);
-    assert(!skip(&sub, bind(" ")) && !sub.begin && !sub.end);
+    assert(!skip(&sub, " ") && !sub.begin && !sub.end);
 
     char buf9[] = "A";
     sub = view(buf9, NULL);
     orig = sub.begin;
-    assert(!skip(&sub, bind(" ")) && sub.begin == orig && sub.end == NULL);
+    assert(!skip(&sub, " ") && sub.begin == orig && sub.end == NULL);
 
     char buf10[] = "A";
     sub = view(NULL, buf10);
-    assert(!skip(&sub, bind(" ")) && !sub.begin && sub.end == buf10);
+    assert(!skip(&sub, " ") && !sub.begin && sub.end == buf10);
 
     char buf11[] = "   ";
     sub = bind(buf11);
-    assert(skip(&sub, bind(" ")) && sub.begin == sub.end);
+    assert(skip(&sub, " ") && sub.begin == sub.end);
 
     char buf12[] = "\t  \tTEXT";
     sub = bind(buf12);
     orig = sub.begin;
-    assert(skip(&sub, bind(" \t")) && sub.begin == orig + 4 && *sub.begin == 'T');
+    assert(skip(&sub, " \t") && sub.begin == orig + 4 && *sub.begin == 'T');
 }
 
-
-
-void test_sno(void) {
+void test_sno_core(void) {
     test_bind();
     test_view();
     test_size();
@@ -955,7 +953,7 @@ void test_sno(void) {
     // 2.10
     test_any();
     test_notany();
-
+    // composition
     test_skip();
 
     printf("All SNOBOL-C primitive tests pass!\n");
