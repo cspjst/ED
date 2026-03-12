@@ -59,8 +59,8 @@ bool str(view_t* subject, const char* match) {
 }
 
 bool chr(view_t* subject, char c) {
-    if (!subject || !subject->begin || subject->begin >= subject->end) return false;
-    if (*subject->begin != c) return false; // check ONLY current character
+    if (!subject || !subject->begin || subject->begin >= subject->end ||
+        *subject->begin != c) return false; // check ONLY current character
     subject->begin++;                       // advance cursor past matched literal
     return true;
 }
@@ -79,9 +79,9 @@ bool var(view_t* subject, char* buf, size_t buflen) {
 }
 
 bool num(view_t* subject, int* n) {
-    if (!subject || !subject->begin || !subject->end || !n) return false;
-    if (subject->begin >= subject->end) return false;  // reject empty subject
-    if (!char_in_set(*subject->begin, bind("+-0123456789"))) return false;
+    if (!subject || !subject->begin || !subject->end || !n ||
+        subject->begin >= subject->end ||  // reject empty subject
+        !char_in_set(*subject->begin, bind("+-0123456789"))) return false;
 
     view_t temp = *subject;
     any(&temp, "+-");  // optional sign (atomic)
@@ -110,9 +110,9 @@ bool nul(view_t* subject) {
 
 // 2.7
 unsigned int at(view_t* subject, cursor_t p) {
-    if (!subject || !subject->begin || !p) return 0;
-    if (p < subject->begin || p > subject->end) return 0;  /* out of bounds */
-    return (unsigned int)(p - subject->begin) + 1u;        /* 1-based index */
+    if (!subject || !subject->begin || !p ||
+        p < subject->begin || p > subject->end) return 0;  // out of bounds 
+    return (unsigned int)(p - subject->begin) + 1u;        // 1-based index 
 }
 
 // 2.8
@@ -124,14 +124,14 @@ bool len(view_t* subject, unsigned int length) {
 
 // 2.9
 bool span(view_t* subject, const char* charset) {
-    if (!subject || !subject->begin || !subject->end || !charset) return false;
-    if (subject->begin >= subject->end) return false;   // 1+ requires non-empty subject
-    if (*charset == '\0') return false;                 // empty charset always fails
+    if (!subject || !subject->begin || !subject->end || !charset ||
+        subject->begin == subject->end ||       // 1+ requires non-empty subject
+        *charset == '\0') return false;         // empty charset always fails
 
     cursor_t start = subject->begin;
     while (subject->begin < subject->end && char_in_cstr(*subject->begin, charset))
         subject->begin++;
-    return subject->begin != start;  // true iff ≥1 char matched
+    return subject->begin != start;             // true iff ≥1 char matched
 }
 
 bool brk(view_t* subject, const char* charset) {
@@ -144,9 +144,9 @@ bool brk(view_t* subject, const char* charset) {
 }
 
 bool any(view_t* subject, const char* charset) {
-    if (!subject || !subject->begin || !subject->end || !charset) return false;
-    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
-    if (*charset == '\0') return false;                 // empty charset always fails
+    if (!subject || !subject->begin || !subject->end || !charset ||
+        subject->begin == subject->end ||        // 1+ requires non-empty subject
+        *charset == '\0') return false;          // empty charset always fails
 
     if (!char_in_cstr(*subject->begin, charset)) return false;
     subject->begin++;
@@ -154,8 +154,8 @@ bool any(view_t* subject, const char* charset) {
 }
 
 bool notany(view_t* subject, const char* charset) {
-    if (!subject || !subject->begin || !subject->end || !charset) return false;
-    if (subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
+    if (!subject || !subject->begin || !subject->end || !charset ||
+        subject->begin >= subject->end) return false;  // 1+ requires non-empty subject
 
     // Empty charset: nothing excluded, so any char matches
     if (*charset == '\0') {
