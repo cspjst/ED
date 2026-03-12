@@ -25,39 +25,41 @@ char* strdupl(char* dst, const char* src, unsigned int n) {
 char* strtrim(char* dst, const char* src) {
     if (!dst || !src) return NULL;
 
-    while (*src == ' ' || *src == '\t') src++;  // find first non-whitespace
-    if (*src == '\0') return dst; // if we hit end, all whitespace
+    // trim leading whitespace
+    while (*src == ' ' || *src == '\t') src++; // find first non-whitespace
+    if (*src == '\0') return dst;              // hit end, all whitespace
 
     const char* end = src;
-    while (*end) end++; // find end of string
+    while (*end) end++;                        // find end of string
 
     // trim trailing whitespace
-    while (end > src && (end[-1] == ' ' || end[-1] == '\t')) end--;
+    while (end > src && (end[-1] == ' ' || end[-1] == '\t')) 
+        end--;                                 // work in from end
 
     char* p = dst;
-    while (src < end) *p++ = *src++;    // copy trimmed range
+    while (src < end) *p++ = *src++;           // copy trimmed range
     *p = '\0';
 
     return dst;
 }
 
 char* strreplace(char* dst, const char* src, const char* from, const char* to) {
-    if (!dst || !src || !from || !to) return NULL;
-    if (*from == '\0' || *to == '\0') return NULL;  // empty mapping fails per SNOBOL spec
+    if (!dst || !src || !from || !to ||
+        *from == '\0' || *to == '\0') return NULL; // empty mapping fails per SNOBOL spec
 
     char* p = dst;
     while (*src) {
         char c = *src++;
-        char replacement = c;  // default: unchanged
+        char rplc = c;  // default: unchanged
 
-        /* Search for mapping (rightmost wins: later entries overwrite) */
+        // Search for mapping (rightmost wins: later entries overwrite) 
         const char* f = from;
         const char* t = to;
         while (*f) {
-            if (c == *f) replacement = *t;
+            if (c == *f) rplc = *t;
             f++; t++;
         }
-        *p++ = replacement;
+        *p++ = rplc;
     }
     *p = '\0';
 
