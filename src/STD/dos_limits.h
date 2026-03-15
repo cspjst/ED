@@ -6,10 +6,6 @@
 #ifndef DOS_LIMITS_H
 #define DOS_LIMITS_H
 
-/* ============================================================================
- * BASIC TYPE LIMITS (8086 data model: char=8, int=16, long=32)
- * ============================================================================
- */
 
 #define CHAR_BIT   8
 #define CHAR_MAX   127
@@ -31,4 +27,4 @@
 #define LONG_MIN   (-2147483647L - 1)
 #define ULONG_MAX  4294967295UL
 
-#endif /* DOS_LIMITS_H */
+#endif

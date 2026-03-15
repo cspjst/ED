@@ -1,0 +1,138 @@
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(73): Warning! W131: No prototype found for function 'fopen'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(73): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(73): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(73): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(79): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(79): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(79): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(85): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(85): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(85): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(90): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(90): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(90): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(95): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(95): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(95): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(101): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(101): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(101): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(107): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(107): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(107): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(113): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(113): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(113): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(118): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(118): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(118): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(124): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(124): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(124): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(129): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(129): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(129): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(135): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(135): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(135): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(141): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(141): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(141): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(147): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(147): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(147): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(164): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(164): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(164): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(167): Warning! W131: No prototype found for function 'fclose'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(170): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(170): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(170): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(175): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(175): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(175): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(180): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(180): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(180): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(197): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(197): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(197): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(206): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(206): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(206): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(221): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(221): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(221): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(224): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(224): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(224): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(242): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(242): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(242): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(250): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(250): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(250): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(271): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(271): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(271): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(276): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(276): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(276): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(298): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(298): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(298): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(300): Warning! W131: No prototype found for function 'fwrite'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(305): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(305): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(305): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(307): Warning! W131: No prototype found for function 'fread'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(322): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(322): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(322): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(328): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(328): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(328): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(349): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(349): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(349): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(355): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(355): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(355): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(357): Warning! W131: No prototype found for function 'ftell'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(360): Warning! W131: No prototype found for function 'fseek'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(375): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(375): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(375): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(389): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(389): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(389): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(402): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(402): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(402): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(420): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(420): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(420): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(427): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(427): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(427): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(438): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(438): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(438): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(450): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(450): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(450): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(459): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(459): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(459): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(496): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(496): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(496): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(504): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(504): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(504): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(521): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(521): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(521): Note! I2004: target conversion type is 'unsigned short *'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(528): Warning! W102: Type mismatch (warning)
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(528): Note! I2003: source conversion type is 'int'
+/Users/jeremythornton/dosbox/cspjst/ED/src/TEST/test_files.h(528): Note! I2004: target conversion type is 'unsigned short *'

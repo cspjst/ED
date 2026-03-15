@@ -1,7 +1,7 @@
 #ifndef SNO_EXTRA_H
 #define SNO_EXTRA_H
 
-#ifdef POLICY_USE_DOS_STD
+#ifdef POLICY_USE_DOSLIBC
     #include "dos_stddef.h"
     #include "dos_stdbool.h"
 #else

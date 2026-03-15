@@ -1,7 +1,7 @@
 #ifndef TEST_DOS_FILES_H
 #define TEST_DOS_FILES_H
 
-#ifdef POLICY_USE_DOS_STD
+#ifdef POLICY_USE_DOSLIBC
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_stdint.h"
     #include "../STD/dos_string.h"

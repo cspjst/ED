@@ -2,7 +2,7 @@
 #define TEST_BIOS_H
 
 
-#ifdef POLICY_USE_DOS_STD
+#ifdef USE_DOSLIBC
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_assert.h"
 #else

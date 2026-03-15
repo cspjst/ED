@@ -1,10 +1,15 @@
 #ifndef TEST_STRING_H
 #define TEST_STRING_H
 
-
-#include "dos_string.h"
-#include "dos_stdio.h"
-#include "dos_assert.h"
+#ifdef POLICY_USE_DOSLIBC
+    #include "../STD/dos_string.h"
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_assert.h"
+#else
+    #include <string.h>
+    #include <stdio.h>
+    #include <assert.h>
+#endif
 
 void test_strlen() {
 

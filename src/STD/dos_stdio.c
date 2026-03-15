@@ -1,7 +1,7 @@
 #include "dos_stdio.h"
 #include "dos_errno.h"
 #include "dos_string.h"
-#include "dos_bool.h"
+#include "dos_stdbool.h"
 #include "dos_limits.h"
 #include "dos_stdarg.h"
 #include "../DOS/dos_services_constants.h"
@@ -54,7 +54,7 @@ static int print_int(long val, int base, FILE* stream) {
     return count + n;
 }
 
-#ifdef DOS_STDIO_PRINTF_FLOAT
+#ifdef USE_DOSLIBC_FLOAT_PRINTF
 static int print_float(double val, FILE* stream) {
     int count = 0;
 
@@ -93,9 +93,7 @@ static int print_float(double val, FILE* stream) {
     }
     return count;
 }
-#endif // DOS_STDIO_PRINTF_FLOAT
 
-#ifdef DOS_STDIO_PRINTF_SCIENTIFIC
 static int print_scientific(double val, bool uppercase, FILE* stream) {
     int count = 0;
 
@@ -127,7 +125,7 @@ static int print_scientific(double val, bool uppercase, FILE* stream) {
 
     return count;
 }
-#endif // DOS_STDIO_PRINTF_SCIENTIFIC
+#endif // USE_DOSLIBC_FLOAT_PRINTF
 
 // Core I/O primitives
 
@@ -248,20 +246,17 @@ int fprintf(FILE* stream, const char* format, ...) {
                             : print_uint(va_arg(args, unsigned int), 8, stream);
                 break;
 
-#ifdef DOS_STDIO_PRINTF_FLOAT
+#ifdef USE_DOSLIBC_FLOAT_PRINTF
             case 'f':
                 n = print_float(va_arg(args, double), stream);
                 break;
-#endif
-
-#ifdef DOS_STDIO_PRINTF_SCIENTIFIC
             case 'e':
                 n = print_scientific(va_arg(args, double), false, stream);
                 break;
             case 'E':
                 n = print_scientific(va_arg(args, double), true, stream);
                 break;
-#endif
+#endif // USE_DOSLIBC_FLOAT_PRINTF
 
             case '%':
                 n = (fputc('%', stream) == EOF) ? EOF : 1;
@@ -341,8 +336,7 @@ void perror(const char *s) {
 
 // File handling
 
-#ifdef DOS_STDIO_FILE_HANDLING
-
+#ifdef USE_DOSLIBC_FILE_IO
 
 FILE* fopen(const char* filename, const char* mode) {
     if (!filename || !mode || !mode[0]) {
@@ -502,4 +496,4 @@ long ftell(FILE* stream) {
     return (long)pos;
 }
 
-#endif // DOS_STDIO_FILE_HANDLING
+#endif // USE_DOSLIBC_FILE_IO

@@ -4,7 +4,7 @@
 #ifndef DOS_MEMORY_SERVICES_H
 #define DOS_MEMORY_SERVICES_H
 
-#ifdef POLICY_USE_DOS_STD
+#ifdef USE_DOSLIBC
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>
