@@ -1,22 +1,21 @@
 #ifndef TEST_STDIO_H
 #define TEST_STDIO_H
 
-
-#include "dos_stdio.h"
-#include "dos_errno.h"
-#include "dos_stdlib.h"
-#include "dos_assert.h"
-#include "dos_string.h"
-
-/*
-#include <stdio.h>
-#include <errno.h>
-#include <stdlib.h>
-#include <assert.h>
-#include <string.h>
-#include <stddef.h>
-#include <stdint.h>
-*/
+#ifdef POLICY_USE_DOSLIBC
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_errno.h"
+    #include "../STD/dos_stdlib.h"
+    #include "../STD/dos_assert.h"
+    #include "../STD/dos_string.h"
+#else
+    #include <stdio.h>
+    #include <errno.h>
+    #include <stdlib.h>
+    #include <assert.h>
+    #include <string.h>
+    #include <stddef.h>
+    #include <stdint.h>
+#endif
 
 #define TEST_BUF_SIZE 64
 
@@ -368,11 +367,9 @@ void test_stdio() {
     getchar();
     test_fputs_file_ops();
     getchar();
-    #ifdef DOS_STDIO_PRINTF_FLOAT
+    #ifdef USE_DOSLIBC_FLOAT_PRINTF
     test_printf_float_basic();
     getchar();
-    #endif
-    #ifdef DOS_STDIO_PRINTF_SCIENTIFIC
     test_printf_scientific_basic();
     getchar();
     test_printf_float_edge_cases();
@@ -380,7 +377,7 @@ void test_stdio() {
     #endif
     test_perror_strerror();
     getchar();
-    test_fgets_stdin();     // Interactive
+    test_fgets_stdin();
 
 }
 

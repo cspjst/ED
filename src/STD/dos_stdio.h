@@ -79,7 +79,7 @@ int fscanf(FILE* stream, const char* format, ...);
 void perror(const char *s);
 
 // file operations
-#ifdef DOS_STDIO_FILE_HANDLING
+#ifdef POLICY_USE_FILE_HANDLING
 
 FILE* fopen(const char* filename, const char* mode);
 size_t fread(void* ptr, size_t size, size_t count, FILE* stream);
@@ -88,6 +88,6 @@ int fseek(FILE* stream, long offset, int origin);
 long ftell(FILE* stream);
 int fclose(FILE* stream);
 
-#endif // DOS_STDIO_FILE_HANDLING
+#endif // USE_DOSLIBC_FILE_IO
 
 #endif // DOS_STDIO_H

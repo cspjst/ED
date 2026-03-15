@@ -65,7 +65,9 @@ add_compile_options(
 add_definitions(
     -D__DOS__
     -D__8086__  # Explicit 8086 target
-    #-DPOLICY_USE_DOS_STD
+    -DUSE_DOSLIBC
+    -DUSE_DOSLIBC_FLOAT_PRINTF
+    -DUSE_DOSLIBC_FILE_IO
 )
 
 endif()
@@ -74,11 +76,11 @@ endif()
 file(GLOB SOURCES
     CONFIGURE_DEPENDS
     *.c
-    #BIOS/*.c
-    #DOS/*.c
-    #STD/*.c
+    BIOS/*.c
+    DOS/*.c
+    STD/*.c
     TEST/*.c
-    SNO/*.c
+    #SNO/*.c
 )
 
 # message(Source list="${SOURCES}")

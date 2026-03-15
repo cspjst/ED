@@ -1,7 +1,7 @@
 #ifndef TEST_MEMORY_H
 #define TEST_MEMORY_H
 
-#ifdef POLICY_USE_DOS_STD
+#ifdef POLICY_USE_DOSLIBC
     #include "../STD/dos_stdio.h"
     #include "../STD/dos_assert.h"
 #else

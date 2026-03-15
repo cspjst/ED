@@ -1,27 +1,26 @@
 #ifndef TEST_FILES_H
 #define TEST_FILES_H
 
-#include "dos_errno.h"
-#include "dos_assert.h"
-#include "dos_stdio.h"
-#include "dos_string.h"
-#include "../DOS/dos_file_services.h"
-
-/*
-#include <errno.h>
-#include <assert.h>
-#include <stdio.h>
-#include <string.h>
-*/
+#ifdef POLICY_USE_DOSLIBC
+    #include "../STD/dos_errno.h"
+    #include "../STD/dos_assert.h"
+    #include "../STD/dos_stdio.h"
+    #include "../STD/dos_string.h"
+    #include "../DOS/dos_file_services.h"
+#else
+    #include <errno.h>
+    #include <assert.h>
+    #include <stdio.h>
+    #include <string.h>
+#endif
 
 #define TEST_BUF_SIZE 64
 
 static void test_file_cleanup(const char* filename) {
-    //dos_delete_file(filename);  // Ignore error - file may not exist
+    dos_delete_file(filename);  // Ignore error - file may not exist
 }
 
 static int test_file_setup(const char* filename, const char* content) {
-    /*
     dos_file_handle_t handle = 0;
     dos_error_code_t err = DOS_SUCCESS;
     uint16_t written = 0;
@@ -41,11 +40,10 @@ static int test_file_setup(const char* filename, const char* content) {
     dos_close_file(handle);
 
     return (err == DOS_SUCCESS && written == len) ? 0 : -1;
-    */
 }
 
 static int test_file_readall(const char* filename, char* buffer, uint16_t bufsize) {
-    /*
+
     dos_file_handle_t handle = 0;
     dos_error_code_t err = DOS_SUCCESS;
     uint16_t bytes_read = 0;
@@ -62,7 +60,7 @@ static int test_file_readall(const char* filename, char* buffer, uint16_t bufsiz
         return (int)bytes_read;
     }
     return -1;
-    */
+
 }
 
 void test_fopen(void) {

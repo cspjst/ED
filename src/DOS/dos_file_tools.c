@@ -1,4 +1,4 @@
-#ifdef POLICY_USE_DOS_STD
+#ifdef USE_DOSLIBC
     #include "../STD/dos_stddef.h"
 #else
     #include <stddef.h>
