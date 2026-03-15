@@ -1,3 +1,7 @@
+#ifndef __LARGE__
+    #error "This module requires large memory model (ie far data pointers)"
+#endif
+
 /*
 * @url http://bitsavers.informatik.uni-stuttgart.de/pdf/borland/turbo_c/Turbo_C_Reference_Guide_1987.pdf
 * @url https://www.stanislavs.org/helppc/
@@ -9,10 +13,6 @@
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>
-#endif
-
-#ifndef __LARGE__
-    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 // 0  Program terminate

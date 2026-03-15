@@ -1,5 +1,6 @@
-#ifndef DOS_STDARG_H
-#define DOS_STDARG_H
+#ifndef __LARGE__
+    #error "This module requires large memory model (far data pointers)"
+#endif
 
 /**
  * 8086 real mode, LARGE memory model (Open Watcom):
@@ -9,10 +10,8 @@
  * - Default promotions apply: char/short→int, float→double
  * - sizeof(type) correctly returns 2 for near ptr, 4 for far ptr/long, 8 for double
  */
-
-#ifndef __LARGE__
-    #error "This module requires large memory model (far data pointers)"
-#endif
+#ifndef DOS_STDARG_H
+#define DOS_STDARG_H
 
 /**
  * va_list is a NEAR pointer into the current stack frame (SS)

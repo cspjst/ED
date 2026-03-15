@@ -1,3 +1,7 @@
+#ifndef __LARGE__
+    #error "This module requires large memory model (ie far data pointers)"
+#endif
+
 /**
  * @url https://www.stanislavs.org/helppc/
  */
@@ -8,10 +12,6 @@
     #include "../STD/dos_stdint.h"
 #else
     #include <stdint.h>
-#endif
-
-#ifndef __LARGE__
-    #error "This module requires large memory model (ie far data pointers)"
 #endif
 
 #include "dos_error_types.h"
